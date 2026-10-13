@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Next.js and build output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local environment files and secrets (keep non-secret templates)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Vercel and local Supabase state
+.vercel/
+supabase/.branches/
+supabase/.temp/
+
+# Test and coverage output
+coverage/
+playwright-report/
+test-results/
+
+# Logs
+*.log
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
