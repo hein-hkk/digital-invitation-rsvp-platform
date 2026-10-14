@@ -1,0 +1,4 @@
+minimumReleaseAge: 0
+autoInstallPeers: false
+allowBuilds:
+  unrs-resolver: true
