@@ -1,0 +1,1 @@
+-- M1 has no application tables or synthetic seed rows yet.
