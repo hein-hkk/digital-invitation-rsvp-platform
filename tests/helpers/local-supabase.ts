@@ -52,6 +52,74 @@ export function anonymousClient(): SupabaseClient<Database> {
   return client(localStatus().ANON_KEY);
 }
 
+export function localMailpitUrl(): string {
+  const status = localStatus() as LocalStatus & { MAILPIT_URL?: string };
+  if (!status.MAILPIT_URL?.startsWith("http://127.0.0.1:")) {
+    throw new Error("Local Mailpit is required for OTP tests");
+  }
+  return status.MAILPIT_URL;
+}
+
+export async function provisionOtpOrganizer(): Promise<{
+  id: string;
+  email: string;
+}> {
+  const email = `m3-${randomUUID()}@example.test`;
+  const { data, error } = await serviceClient().auth.admin.createUser({
+    email,
+    email_confirm: true,
+  });
+  if (error || !data.user)
+    throw error ?? new Error("Cannot provision test Organizer");
+  return { id: data.user.id, email };
+}
+
+export async function readLatestOtp(email: string): Promise<string> {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const response = await fetch(`${localMailpitUrl()}/api/v1/messages`);
+    if (!response.ok) throw new Error("Cannot read local Mailpit messages");
+    const listing = (await response.json()) as {
+      messages: { ID: string; To: { Address: string }[] }[];
+    };
+    const message = listing.messages.find((item) =>
+      item.To.some((recipient) => recipient.Address === email),
+    );
+    if (message) {
+      const detail = await fetch(
+        `${localMailpitUrl()}/api/v1/message/${message.ID}`,
+      );
+      if (!detail.ok) throw new Error("Cannot read local OTP email");
+      const body = (await detail.json()) as { Text: string };
+      const token = body.Text.match(/\b\d{6}\b/)?.[0];
+      if (!token) throw new Error("OTP code not found in local email");
+      return token;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error("Local OTP email was not delivered");
+}
+
+export function expireLocalOtp(userId: string): void {
+  if (!/^[0-9a-f-]{36}$/.test(userId))
+    throw new Error("Invalid local Auth user ID");
+  execFileSync(
+    "docker",
+    [
+      "exec",
+      "supabase_db_digital-invitation-rsvp-platform",
+      "psql",
+      "-U",
+      "postgres",
+      "-d",
+      "postgres",
+      "-q",
+      "-c",
+      `UPDATE auth.users SET recovery_sent_at = NOW() - interval '2 hours' WHERE id = '${userId}'::uuid`,
+    ],
+    { stdio: "ignore" },
+  );
+}
+
 export type OrganizerFixture = {
   id: string;
   client: SupabaseClient<Database>;

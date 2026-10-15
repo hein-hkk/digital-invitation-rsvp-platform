@@ -219,7 +219,7 @@ web3 = 30
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.
-enable_signup = false
+enable_signup = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
@@ -248,6 +248,10 @@ otp_expiry = 3600
 # [auth.email.template.invite]
 # subject = "You have been invited"
 # content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.magic_link]
+subject = "Your sign-in code"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
