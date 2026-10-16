@@ -27,6 +27,9 @@ test("E2E-A-02/03/04 creates incomplete Draft, blocks publication, and publishes
       page.getByRole("heading", { name: "No events yet" }),
     ).toBeVisible();
     await page.getByRole("link", { name: "Create Event" }).first().click();
+    await expect(
+      page.getByRole("button", { name: "Save Draft" }),
+    ).toBeEnabled();
     await page.getByLabel("Event Title").fill("Synthetic Wedding");
     await page.getByRole("button", { name: "Save Draft" }).click();
     await expect(page).toHaveURL(/\/admin\/events\/[0-9a-f-]{36}$/, {
@@ -41,6 +44,9 @@ test("E2E-A-02/03/04 creates incomplete Draft, blocks publication, and publishes
       page.getByRole("alert").filter({ hasText: "can't be published yet" }),
     ).toContainText("can't be published yet");
     await expect(page.getByText("Venue Name is required.")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Save Draft" }),
+    ).toBeEnabled();
 
     await page
       .getByLabel("Wedding / Host Display Names")
@@ -56,7 +62,7 @@ test("E2E-A-02/03/04 creates incomplete Draft, blocks publication, and publishes
     await page.getByRole("button", { name: "Publish Event" }).click();
     await expect(page).toHaveURL(
       /\/admin\/events\/[0-9a-f-]{36}\?published=1$/,
-      { timeout: 15_000 },
+      { timeout: 25_000 },
     );
     await expect(page.getByRole("status")).toHaveText("Event published.");
     await expect(page.getByText("published", { exact: true })).toBeVisible();

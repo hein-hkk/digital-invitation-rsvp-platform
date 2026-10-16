@@ -251,7 +251,7 @@ export function EventForm({
           error={field("dressCode")}
         />
       </section>
-      <section className="space-y-4">
+      <section id="rsvp-settings" className="scroll-mt-6 space-y-4">
         <h2 className="font-display text-2xl font-semibold">RSVP Settings</h2>
         <Field
           name="rsvpDeadlineLocal"

@@ -181,6 +181,29 @@ export function getEventRuntimeState(
     : "published";
 }
 
+export function getGuestRsvpPolicy(
+  event: EventForRuntime & { rsvpDeadlineLocal: string | null },
+  clock: Clock,
+): { state: "open" | "closed" | "ended"; deadlineLocal: string | null } {
+  const runtimeState = getEventRuntimeState(event, clock);
+  if (runtimeState === "ended") {
+    return { state: "ended", deadlineLocal: event.rsvpDeadlineLocal };
+  }
+  if (runtimeState === "draft") {
+    return { state: "closed", deadlineLocal: event.rsvpDeadlineLocal };
+  }
+  const deadline = event.rsvpDeadlineLocal;
+  return {
+    state:
+      deadline &&
+      clock.now().getTime() >=
+        eventLocalToInstant(deadline, event.eventTimezone!).getTime()
+        ? "closed"
+        : "open",
+    deadlineLocal: deadline,
+  };
+}
+
 export function assertEventMutable(event: EventForRuntime, clock: Clock): void {
   if (getEventRuntimeState(event, clock) === "ended") {
     throw new Error("EVENT_NOT_MUTABLE");

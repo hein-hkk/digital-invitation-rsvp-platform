@@ -29,13 +29,27 @@ function updatedLabel(
 
 export default async function InvitationsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ eventId: string }>;
+  searchParams: Promise<{ search?: string; status?: string }>;
 }) {
   const { eventId } = await params;
+  const query = await searchParams;
+  const search = typeof query.search === "string" ? query.search.trim() : "";
+  const status =
+    query.status === "awaiting_response" ||
+    query.status === "attending" ||
+    query.status === "declined"
+      ? query.status
+      : undefined;
+  const hasFilters = Boolean(search || status);
   let workspace;
   try {
-    workspace = await listEventInvitations(eventId);
+    workspace = await listEventInvitations(eventId, {
+      search,
+      rsvpStatus: status,
+    });
   } catch (error) {
     if (
       error instanceof InvitationServiceError &&
@@ -44,7 +58,8 @@ export default async function InvitationsPage({
       notFound();
     throw error;
   }
-  const { event, runtimeState, canMutate, invitations } = workspace;
+  const { event, runtimeState, canMutate, invitations, totalInvitationCount } =
+    workspace;
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
       <Link href={`/admin/events/${eventId}`} className="text-accent underline">
@@ -78,7 +93,55 @@ export default async function InvitationsPage({
           Guest access has ended. This event is read-only.
         </p>
       )}
-      {invitations.length === 0 ? (
+      <form
+        action={`/admin/events/${eventId}/invitations`}
+        method="get"
+        className="mt-8 flex flex-col gap-4 rounded border border-border bg-surface p-5 sm:flex-row sm:items-end"
+      >
+        <div className="flex flex-1 flex-col gap-2">
+          <label htmlFor="invitation-search" className="font-medium">
+            Search by invitee name
+          </label>
+          <input
+            id="invitation-search"
+            name="search"
+            type="search"
+            defaultValue={search}
+            className="min-h-11 rounded border border-border-strong px-3 py-2"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="rsvp-status-filter" className="font-medium">
+            RSVP Status
+          </label>
+          <select
+            id="rsvp-status-filter"
+            name="status"
+            defaultValue={status ?? ""}
+            className="min-h-11 rounded border border-border-strong bg-surface px-3 py-2"
+          >
+            <option value="">All</option>
+            <option value="awaiting_response">Awaiting Response</option>
+            <option value="attending">Attending</option>
+            <option value="declined">Declined</option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          className="min-h-11 rounded bg-accent px-5 py-2 font-medium text-white"
+        >
+          Apply Filters
+        </button>
+        {hasFilters && (
+          <Link
+            href={`/admin/events/${eventId}/invitations`}
+            className="flex min-h-11 items-center text-accent underline"
+          >
+            Clear search and filters
+          </Link>
+        )}
+      </form>
+      {invitations.length === 0 && totalInvitationCount === 0 ? (
         <section className="mt-8 rounded border border-border bg-surface p-8">
           <h2 className="font-display text-xl font-semibold">
             No invitations yet
@@ -94,6 +157,18 @@ export default async function InvitationsPage({
               Create Invitation
             </Link>
           )}
+        </section>
+      ) : invitations.length === 0 ? (
+        <section className="mt-8 rounded border border-border bg-surface p-8">
+          <h2 className="font-display text-xl font-semibold">
+            No invitations match your search or filter.
+          </h2>
+          <Link
+            href={`/admin/events/${eventId}/invitations`}
+            className="mt-4 inline-block min-h-11 py-2 text-accent underline"
+          >
+            Clear search and filters
+          </Link>
         </section>
       ) : (
         <>
