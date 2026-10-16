@@ -69,6 +69,25 @@ describe("Event time and runtime state", () => {
 });
 
 describe("Event validation", () => {
+  it("accepts a deadline before Start and rejects equal, later, or cross-midnight timing", () => {
+    const timing = {
+      eventDate: "2099-11-20",
+      startTime: "18:00",
+      endTime: "22:00",
+      eventTimezone: "Asia/Bangkok",
+      rsvpDeadlineLocal: "2099-11-20T17:59",
+    };
+    expect(validateEventTiming(timing)).toEqual({});
+    expect(
+      validateEventTiming({ ...timing, rsvpDeadlineLocal: "2099-11-20T18:00" }),
+    ).toHaveProperty("rsvpDeadlineLocal");
+    expect(
+      validateEventTiming({ ...timing, rsvpDeadlineLocal: "2099-11-20T18:01" }),
+    ).toHaveProperty("rsvpDeadlineLocal");
+    expect(validateEventTiming({ ...timing, endTime: "17:00" })).toHaveProperty(
+      "endTime",
+    );
+  });
   it("validates IANA timezone, same-day End Time, and deadline ordering", () => {
     expect(isValidEventTimezone("Asia/Bangkok")).toBe(true);
     expect(isValidEventTimezone("Not/A_Timezone")).toBe(false);

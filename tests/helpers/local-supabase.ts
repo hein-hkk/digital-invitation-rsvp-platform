@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash, createHmac, randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getEventRuntimeState } from "@/modules/events/domain";
 import type { Database } from "@/types/database.types";
 
 type LocalStatus = {
@@ -208,21 +209,44 @@ export async function createInvitation(
 export async function cleanupOrganizers(
   organizers: OrganizerFixture[],
 ): Promise<void> {
+  for (const organizer of organizers)
+    await cleanupOrganizerAccount(organizer.id);
+}
+
+export async function cleanupOrganizerAccount(
+  organizerId: string,
+): Promise<void> {
   const service = serviceClient();
-  for (const organizer of organizers) {
-    // Test data only: move active synthetic Events into the past before the
-    // approved Draft/Ended deletion path cleans them up.
-    await service
-      .from("events")
-      .update({ event_date: "2000-01-01", rsvp_deadline_local: null })
-      .eq("owner_user_id", organizer.id)
-      .eq("publication_status", "published");
-    const deletion = await service
-      .from("events")
-      .delete()
-      .eq("owner_user_id", organizer.id);
-    if (deletion.error) throw deletion.error;
-    const authDeletion = await service.auth.admin.deleteUser(organizer.id);
-    if (authDeletion.error) throw authDeletion.error;
+  // Test data only: move active synthetic Events into the past before the
+  // approved Draft/Ended deletion path cleans them up.
+  const events = await service
+    .from("events")
+    .select("id,publication_status,event_date,end_time,event_timezone")
+    .eq("owner_user_id", organizerId);
+  if (events.error) throw events.error;
+  for (const event of events.data ?? []) {
+    const state = getEventRuntimeState(
+      {
+        publicationStatus: event.publication_status,
+        eventDate: event.event_date,
+        endTime: event.end_time,
+        eventTimezone: event.event_timezone,
+      },
+      { now: () => new Date() },
+    );
+    if (state === "published") {
+      const update = await service
+        .from("events")
+        .update({ event_date: "2000-01-01", rsvp_deadline_local: null })
+        .eq("id", event.id);
+      if (update.error) throw update.error;
+    }
   }
+  const deletion = await service
+    .from("events")
+    .delete()
+    .eq("owner_user_id", organizerId);
+  if (deletion.error) throw deletion.error;
+  const authDeletion = await service.auth.admin.deleteUser(organizerId);
+  if (authDeletion.error) throw authDeletion.error;
 }
