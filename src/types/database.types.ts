@@ -256,6 +256,19 @@ export type Database = {
         };
         Returns: undefined;
       };
+      submit_guest_rsvp: {
+        Args: {
+          p_attendee_count: number;
+          p_attendee_names: string[];
+          p_dietary_requirements: string;
+          p_guest_message: string;
+          p_guest_message_present: boolean;
+          p_observed_at?: string;
+          p_status: string;
+          p_token_lookup_hash: string;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       event_publication_status: "draft" | "published";
