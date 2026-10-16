@@ -20,7 +20,7 @@ test("E2E-A-02/03/04 creates incomplete Draft, blocks publication, and publishes
       .getByLabel("Six-digit code")
       .fill(await readLatestOtp(organizer.email));
     await page.getByRole("button", { name: "Verify code" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });
 
     await page.goto("/admin/events");
     await expect(

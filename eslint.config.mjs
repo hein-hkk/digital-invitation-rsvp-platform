@@ -20,6 +20,7 @@ export default defineConfig([
   },
   globalIgnores([
     ".next/**",
+    ".next-playwright/**",
     "out/**",
     "build/**",
     "coverage/**",
