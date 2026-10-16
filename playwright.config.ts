@@ -4,7 +4,10 @@ const port = 3100;
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  fullyParallel: true,
+  // The shared Next.js dev server recompiles App Router pages on first visit.
+  // Run browser flows serially so one test cannot reload another during a form action.
+  fullyParallel: false,
+  workers: 1,
   use: {
     baseURL: `http://127.0.0.1:${port}`,
     ...devices["Desktop Chrome"],
