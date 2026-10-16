@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { GuestRsvpSection } from "@/components/guest/guest-rsvp-section";
 import {
   resolveGuestInvitation,
   type GuestInvitationView,
 } from "@/modules/guest-access/service";
+import { submitGuestRsvpAction } from "@/modules/rsvp/guest-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -37,17 +39,20 @@ function deadlineLabel(deadline: string): string {
   return `${dateLabel(date)} at ${timeLabel(time)}`;
 }
 
-function GuestInvitation({ invitation }: { invitation: GuestInvitationView }) {
+function GuestInvitation({
+  invitation,
+  token,
+  saved,
+}: {
+  invitation: GuestInvitationView;
+  token: string;
+  saved: boolean;
+}) {
   const { event, rsvp, permission } = invitation;
   const hosts = new Intl.ListFormat("en", {
     style: "long",
     type: "conjunction",
   }).format(event.hostDisplayNames);
-  const status = {
-    awaiting_response: "Awaiting Response",
-    attending: "Attending",
-    declined: "Declined",
-  }[rsvp.status];
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-12 sm:px-8 sm:pt-20">
@@ -62,6 +67,14 @@ function GuestInvitation({ invitation }: { invitation: GuestInvitationView }) {
         <p className="mt-1 font-display text-2xl text-text sm:text-3xl">
           {invitation.inviteeName}
         </p>
+        {permission.canEditRsvp && (
+          <a
+            href="#rsvp"
+            className="mt-8 inline-flex min-h-11 items-center rounded-md bg-accent px-7 py-2 font-semibold text-white hover:bg-accent-hover"
+          >
+            RSVP
+          </a>
+        )}
       </header>
 
       <section
@@ -98,51 +111,18 @@ function GuestInvitation({ invitation }: { invitation: GuestInvitationView }) {
         </section>
       )}
 
-      <section
-        id="rsvp"
-        aria-labelledby="rsvp-heading"
-        className="mt-14 rounded-xl border border-border bg-surface px-5 py-7 shadow-sm sm:px-9"
-      >
-        <h2 id="rsvp-heading" className="font-display text-2xl">
-          RSVP
-        </h2>
-        {!permission.canEditRsvp && (
-          <p
-            role="status"
-            className="mt-4 rounded-md bg-warning-soft px-4 py-3 text-sm text-text"
-          >
-            RSVP changes are now closed.
-          </p>
-        )}
-        <p className="mt-5 font-medium">{status}</p>
-        {rsvp.status === "attending" && (
-          <div className="mt-3 space-y-2 text-text-muted">
-            <p>{rsvp.attendeeCount} attending</p>
-            {rsvp.attendeeNames.length > 0 && (
-              <ul className="list-inside list-disc">
-                {rsvp.attendeeNames.map((name, index) => (
-                  <li key={index}>{name}</li>
-                ))}
-              </ul>
-            )}
-            {rsvp.dietaryRequirements && (
-              <p className="whitespace-pre-wrap break-words">
-                {rsvp.dietaryRequirements}
-              </p>
-            )}
-          </div>
-        )}
-        {rsvp.guestMessage && rsvp.status !== "awaiting_response" && (
-          <p className="mt-3 whitespace-pre-wrap break-words text-text-muted">
-            {rsvp.guestMessage}
-          </p>
-        )}
-        {permission.canEditRsvp && event.rsvpDeadlineLocal && (
-          <p className="mt-5 text-sm text-text-muted">
-            Please RSVP by {deadlineLabel(event.rsvpDeadlineLocal)}.
-          </p>
-        )}
-      </section>
+      <GuestRsvpSection
+        rsvp={rsvp}
+        maximumPartySize={invitation.maximumPartySize}
+        canEdit={permission.canEditRsvp}
+        deadlineLabel={
+          event.rsvpDeadlineLocal
+            ? deadlineLabel(event.rsvpDeadlineLocal)
+            : null
+        }
+        saved={saved}
+        action={submitGuestRsvpAction.bind(null, token)}
+      />
 
       {(event.venueArrivalNotes || event.venueMapUrl) && (
         <section
@@ -195,10 +175,13 @@ function GuestInvitation({ invitation }: { invitation: GuestInvitationView }) {
 
 export default async function GuestPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
   const { token } = await params;
+  const { saved } = await searchParams;
   const result = await resolveGuestInvitation(token);
   if (!result.ok) {
     return (
@@ -211,5 +194,11 @@ export default async function GuestPage({
       </main>
     );
   }
-  return <GuestInvitation invitation={result.value} />;
+  return (
+    <GuestInvitation
+      invitation={result.value}
+      token={token}
+      saved={saved === "1"}
+    />
+  );
 }
