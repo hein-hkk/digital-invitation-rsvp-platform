@@ -2,16 +2,25 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyInvitationLink } from "@/components/admin/copy-invitation-link";
 import {
+  InvitationDetailForm,
+  OrganizerRsvpForm,
+} from "@/components/admin/invitation-detail-forms";
+import { updateInvitationAction } from "@/modules/invitations/actions";
+import { updateOrganizerRsvpAction } from "@/modules/rsvp/organizer-actions";
+import {
   getInvitationAdminDetail,
   InvitationServiceError,
 } from "@/modules/invitations/service";
 
 export default async function InvitationDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ eventId: string; invitationId: string }>;
+  searchParams: Promise<{ invitationSaved?: string; rsvpSaved?: string }>;
 }) {
   const { eventId, invitationId } = await params;
+  const saved = await searchParams;
   let detail;
   try {
     detail = await getInvitationAdminDetail(eventId, invitationId);
@@ -32,6 +41,15 @@ export default async function InvitationDetailPage({
     accessState,
     currentInvitationUrl,
   } = detail;
+  const canMutate = runtimeState !== "ended";
+  const dateLabel = (value: string | null) =>
+    value
+      ? new Intl.DateTimeFormat("en", {
+          dateStyle: "medium",
+          timeStyle: "short",
+          timeZone: event.event_timezone ?? "UTC",
+        }).format(new Date(value))
+      : "—";
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <Link
@@ -56,6 +74,14 @@ export default async function InvitationDetailPage({
           · Access: {accessState}
         </p>
       </header>
+      {(saved.invitationSaved === "1" || saved.rsvpSaved === "1") && (
+        <p
+          role="status"
+          className="mt-5 rounded bg-success-soft p-4 text-success"
+        >
+          {saved.rsvpSaved === "1" ? "RSVP saved." : "Invitation saved."}
+        </p>
+      )}
       {runtimeState === "draft" && (
         <p className="mt-6 rounded bg-warning-soft p-4 text-warning">
           This event is still a draft. The invitation link won&apos;t open for
@@ -75,8 +101,7 @@ export default async function InvitationDetailPage({
           <div className="mt-4">
             <CopyInvitationLink url={currentInvitationUrl} />
             <p className="mt-2 text-sm text-text-muted">
-              Share this link privately with the invitee. Guest viewing will be
-              available when the Guest experience is released.
+              Share this link privately with the invitee.
             </p>
           </div>
         ) : (
@@ -101,13 +126,71 @@ export default async function InvitationDetailPage({
             <dd>{invitation.maximum_party_size}</dd>
           </div>
         </dl>
+        {canMutate && (
+          <InvitationDetailForm
+            inviteeName={invitation.invitee_name}
+            maximumPartySize={invitation.maximum_party_size}
+            action={updateInvitationAction.bind(null, eventId, invitationId)}
+          />
+        )}
       </section>
       <section className="mt-6 rounded border border-border bg-surface p-6">
         <h2 className="font-display text-2xl font-semibold">Current RSVP</h2>
-        <p className="mt-3 capitalize">{rsvp.status.replaceAll("_", " ")}</p>
-        <p className="mt-1 text-text-muted">
-          Attendee Count: {rsvp.attendee_count}
-        </p>
+        <dl className="mt-4 space-y-3">
+          <div>
+            <dt className="text-sm text-text-muted">Status</dt>
+            <dd className="capitalize">{rsvp.status.replaceAll("_", " ")}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-text-muted">Attendee Count</dt>
+            <dd>{rsvp.attendee_count}</dd>
+          </div>
+          {rsvp.status === "attending" && rsvp.attendee_names.length > 0 && (
+            <div>
+              <dt className="text-sm text-text-muted">Attendee Names</dt>
+              <dd className="whitespace-pre-wrap break-words">
+                {rsvp.attendee_names.join("\n")}
+              </dd>
+            </div>
+          )}
+          {rsvp.status === "attending" && rsvp.dietary_requirements && (
+            <div>
+              <dt className="text-sm text-text-muted">Dietary Requirements</dt>
+              <dd className="whitespace-pre-wrap break-words">
+                {rsvp.dietary_requirements}
+              </dd>
+            </div>
+          )}
+          <div>
+            <dt className="text-sm text-text-muted">Guest Message</dt>
+            <dd className="whitespace-pre-wrap break-words">
+              {rsvp.guest_message || "—"}
+            </dd>
+          </div>
+          {rsvp.status !== "awaiting_response" && (
+            <>
+              <div>
+                <dt className="text-sm text-text-muted">Responded At</dt>
+                <dd>{dateLabel(rsvp.responded_at)}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-text-muted">Updated At</dt>
+                <dd>{dateLabel(rsvp.response_updated_at)}</dd>
+              </div>
+            </>
+          )}
+        </dl>
+        {canMutate && (
+          <OrganizerRsvpForm
+            status={rsvp.status}
+            attendeeCount={rsvp.attendee_count}
+            attendeeNames={rsvp.attendee_names}
+            dietaryRequirements={rsvp.dietary_requirements}
+            guestMessage={rsvp.guest_message}
+            maximumPartySize={invitation.maximum_party_size}
+            action={updateOrganizerRsvpAction.bind(null, eventId, invitationId)}
+          />
+        )}
       </section>
     </main>
   );

@@ -24,6 +24,7 @@ export type InvitationErrorCode =
   | "INVITATION_NOT_FOUND"
   | "EVENT_NOT_MUTABLE"
   | "INVITATION_INVALID"
+  | "MAX_PARTY_SIZE_CONFLICT"
   | "INVITATION_PERSISTENCE_ERROR";
 
 export class InvitationServiceError extends Error {
@@ -121,6 +122,49 @@ export function createInvitationOperations(context: InvitationContext) {
         invitationId,
         currentInvitationUrl: invitationUrl(credential.rawToken, tokenConfig),
       };
+    },
+
+    async updateInvitation(
+      eventId: string,
+      invitationId: string,
+      values: InvitationValues,
+    ) {
+      const workspace = await requireEvent(eventId);
+      if (!z.uuid().safeParse(invitationId).success) {
+        throw new InvitationServiceError("INVITATION_NOT_FOUND");
+      }
+      if (!workspace.canMutate) {
+        throw new InvitationServiceError("EVENT_NOT_MUTABLE");
+      }
+      const validated = validateInvitationValues(values);
+      if (!validated.valid || validated.maximumPartySize === null) {
+        throw new InvitationServiceError(
+          "INVITATION_INVALID",
+          validated.fieldErrors,
+        );
+      }
+      const { data, error } = await client.rpc("update_invitation_record", {
+        p_event_id: eventId,
+        p_invitation_id: invitationId,
+        p_invitee_name: validated.inviteeName,
+        p_maximum_party_size: validated.maximumPartySize,
+      });
+      if (error || !data) {
+        if (error?.message === "EVENT_NOT_MUTABLE") {
+          throw new InvitationServiceError("EVENT_NOT_MUTABLE");
+        }
+        if (error?.message === "INVITATION_UNAVAILABLE") {
+          throw new InvitationServiceError("INVITATION_NOT_FOUND");
+        }
+        if (error?.message.startsWith("MAX_PARTY_SIZE_CONFLICT:")) {
+          const attendeeCount = Number(error.message.split(":")[1]);
+          throw new InvitationServiceError("MAX_PARTY_SIZE_CONFLICT", {
+            maximumPartySize: `Maximum Party Size can't be lower than the current Attendee Count of ${attendeeCount}. Update the RSVP first, then lower the party size.`,
+          });
+        }
+        throw new InvitationServiceError("INVITATION_PERSISTENCE_ERROR");
+      }
+      return { invitation: data };
     },
 
     async getInvitationAdminDetail(eventId: string, invitationId: string) {
@@ -229,5 +273,17 @@ export async function getInvitationAdminDetail(
   return (await organizerInvitationOperations()).getInvitationAdminDetail(
     eventId,
     invitationId,
+  );
+}
+
+export async function updateInvitation(
+  eventId: string,
+  invitationId: string,
+  values: InvitationValues,
+) {
+  return (await organizerInvitationOperations()).updateInvitation(
+    eventId,
+    invitationId,
+    values,
   );
 }

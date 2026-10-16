@@ -269,6 +269,56 @@ export type Database = {
         };
         Returns: Json;
       };
+      update_invitation_record: {
+        Args: {
+          p_event_id: string;
+          p_invitation_id: string;
+          p_invitee_name: string;
+          p_maximum_party_size: number;
+        };
+        Returns: {
+          created_at: string;
+          event_id: string;
+          id: string;
+          invitee_name: string;
+          maximum_party_size: number;
+          revoked_at: string | null;
+          updated_at: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "invitations";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      update_organizer_rsvp: {
+        Args: {
+          p_attendee_count: number;
+          p_attendee_names: string[];
+          p_dietary_requirements: string;
+          p_event_id: string;
+          p_invitation_id: string;
+          p_status: string;
+        };
+        Returns: {
+          attendee_count: number;
+          attendee_names: string[];
+          created_at: string;
+          dietary_requirements: string | null;
+          guest_message: string | null;
+          invitation_id: string;
+          responded_at: string | null;
+          response_updated_at: string | null;
+          status: Database["public"]["Enums"]["rsvp_status"];
+        };
+        SetofOptions: {
+          from: "*";
+          to: "rsvps";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
     };
     Enums: {
       event_publication_status: "draft" | "published";
