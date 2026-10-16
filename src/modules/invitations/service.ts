@@ -44,6 +44,11 @@ export type InvitationContext = {
   tokenConfig: InvitationTokenConfig;
 };
 
+export type InvitationListOptions = {
+  search?: string;
+  rsvpStatus?: "awaiting_response" | "attending" | "declined";
+};
+
 export function createInvitationOperations(context: InvitationContext) {
   const { client, credentialClient, organizerId, clock, tokenConfig } = context;
 
@@ -72,7 +77,10 @@ export function createInvitationOperations(context: InvitationContext) {
   }
 
   return {
-    async listEventInvitations(eventId: string) {
+    async listEventInvitations(
+      eventId: string,
+      options: InvitationListOptions = {},
+    ) {
       const workspace = await requireEvent(eventId);
       const { data, error } = await client
         .from("invitations")
@@ -83,7 +91,20 @@ export function createInvitationOperations(context: InvitationContext) {
         .order("created_at", { ascending: false });
       if (error)
         throw new InvitationServiceError("INVITATION_PERSISTENCE_ERROR");
-      return { ...workspace, invitations: data ?? [] };
+      const allInvitations = data ?? [];
+      const search = (options.search ?? "").trim().toLocaleLowerCase();
+      const invitations = allInvitations.filter(
+        (invitation) =>
+          (!search ||
+            invitation.invitee_name.toLocaleLowerCase().includes(search)) &&
+          (!options.rsvpStatus ||
+            invitation.rsvps?.status === options.rsvpStatus),
+      );
+      return {
+        ...workspace,
+        invitations,
+        totalInvitationCount: allInvitations.length,
+      };
     },
 
     async createInvitation(eventId: string, values: InvitationValues) {
@@ -252,8 +273,14 @@ async function organizerInvitationOperations() {
   });
 }
 
-export async function listEventInvitations(eventId: string) {
-  return (await organizerInvitationOperations()).listEventInvitations(eventId);
+export async function listEventInvitations(
+  eventId: string,
+  options: InvitationListOptions = {},
+) {
+  return (await organizerInvitationOperations()).listEventInvitations(
+    eventId,
+    options,
+  );
 }
 
 export async function createInvitation(

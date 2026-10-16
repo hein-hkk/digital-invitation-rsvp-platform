@@ -3,6 +3,7 @@ import {
   assertEventMutable,
   eventLocalToInstant,
   getEventExpirationAt,
+  getGuestRsvpPolicy,
   getEventRuntimeState,
   isEventDeletable,
   isValidEventTimezone,
@@ -65,6 +66,34 @@ describe("Event time and runtime state", () => {
     expect(
       eventLocalToInstant("2026-03-08T02:30", "America/New_York").toISOString(),
     ).toBe("2026-03-08T07:30:00.000Z");
+  });
+
+  it("derives Guest RSVP availability from publication, deadline, and expiration", () => {
+    const event = { ...published, rsvpDeadlineLocal: "2026-11-19T18:00" };
+    expect(
+      getGuestRsvpPolicy(event, clockAt("2026-11-19T10:59:59Z")).state,
+    ).toBe("open");
+    expect(
+      getGuestRsvpPolicy(event, clockAt("2026-11-19T11:00:00Z")).state,
+    ).toBe("closed");
+    expect(
+      getGuestRsvpPolicy(
+        { ...event, rsvpDeadlineLocal: null },
+        clockAt("2026-11-19T11:00:00Z"),
+      ).state,
+    ).toBe("open");
+    expect(
+      getGuestRsvpPolicy(
+        { ...event, publicationStatus: "draft" },
+        clockAt("2026-11-19T10:00:00Z"),
+      ).state,
+    ).toBe("closed");
+    expect(
+      getGuestRsvpPolicy(
+        { ...event, rsvpDeadlineLocal: null },
+        clockAt("2026-11-20T15:00:00Z"),
+      ).state,
+    ).toBe("ended");
   });
 });
 

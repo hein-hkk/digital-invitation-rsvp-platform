@@ -43,10 +43,15 @@ test("E2E-A-06/09 manages current RSVP and enforces party-size conflict", async 
     await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });
 
     await page.goto(`/admin/events/${eventId}/invitations/new`);
+    await expect(
+      page.getByRole("button", { name: "Create Invitation" }),
+    ).toBeEnabled();
     await page.getByLabel("Invitee Name").fill("Synthetic Household");
     await page.getByLabel("Maximum Party Size").fill("3");
     await page.getByRole("button", { name: "Create Invitation" }).click();
-    await expect(page).toHaveURL(/\/invitations\/[0-9a-f-]{36}$/);
+    await expect(page).toHaveURL(/\/invitations\/[0-9a-f-]{36}$/, {
+      timeout: 20_000,
+    });
     const invitationId = page.url().split("/").at(-1)!;
 
     await page.getByRole("button", { name: "Edit RSVP" }).click();

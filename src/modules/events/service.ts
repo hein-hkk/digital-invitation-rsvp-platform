@@ -5,7 +5,11 @@ import { resolveOrganizerSession } from "@/server/auth/session";
 import { createAuthenticatedSupabaseClient } from "@/server/supabase/authenticated";
 import { productionClock, type Clock } from "@/server/time/clock";
 import type { Database } from "@/types/database.types";
-import { assertEventMutable, getEventRuntimeState } from "./domain";
+import {
+  assertEventMutable,
+  getEventRuntimeState,
+  getGuestRsvpPolicy,
+} from "./domain";
 import {
   emptyEventValues,
   eventDatabaseValues,
@@ -102,6 +106,52 @@ export function createEventOperations(context: EventContext) {
       };
     },
 
+    async getEventOverview(eventId: string) {
+      const event = await requireOwnedEvent(eventId);
+      const observedAt = clock.now();
+      const snapshotClock: Clock = { now: () => observedAt };
+      const runtimeState = getEventRuntimeState(
+        runtimeEvent(event),
+        snapshotClock,
+      );
+      const { data, error } = await client
+        .from("invitations")
+        .select("id,rsvps(status,attendee_count)")
+        .eq("event_id", eventId);
+      if (error) throw new EventServiceError("EVENT_PERSISTENCE_ERROR");
+      const invitations = data ?? [];
+      const metrics = {
+        totalInvitations: invitations.length,
+        attendingInvitations: 0,
+        declinedInvitations: 0,
+        awaitingResponseInvitations: 0,
+        totalExpectedAttendees: 0,
+      };
+      for (const invitation of invitations) {
+        const rsvp = invitation.rsvps;
+        if (rsvp?.status === "attending") {
+          metrics.attendingInvitations += 1;
+          metrics.totalExpectedAttendees += rsvp.attendee_count;
+        } else if (rsvp?.status === "declined") {
+          metrics.declinedInvitations += 1;
+        } else {
+          metrics.awaitingResponseInvitations += 1;
+        }
+      }
+      return {
+        event,
+        runtimeState,
+        ...metrics,
+        guestRsvpPolicy: getGuestRsvpPolicy(
+          {
+            ...runtimeEvent(event),
+            rsvpDeadlineLocal: event.rsvp_deadline_local,
+          },
+          snapshotClock,
+        ),
+      };
+    },
+
     async createEventDraft(input: Partial<EventValues> = {}) {
       const values = { ...emptyEventValues, ...input };
       const fieldErrors = validateEventValues(values, false);
@@ -195,6 +245,10 @@ export async function listOwnedEvents() {
 
 export async function getEventWorkspace(eventId: string) {
   return (await organizerEventOperations()).getEventWorkspace(eventId);
+}
+
+export async function getEventOverview(eventId: string) {
+  return (await organizerEventOperations()).getEventOverview(eventId);
 }
 
 export async function createEventDraft(values: Partial<EventValues>) {

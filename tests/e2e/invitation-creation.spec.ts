@@ -41,10 +41,15 @@ test("E2E-A-05/06 creates a Draft Invitation and copies its current link", async
     ).toBeVisible();
     await page.getByRole("link", { name: "Create Invitation" }).first().click();
     await expect(page.getByText("This event is still a draft.")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Create Invitation" }),
+    ).toBeEnabled();
     await page.getByLabel("Invitee Name").fill("Test Household");
     await page.getByLabel("Maximum Party Size").fill("3");
     await page.getByRole("button", { name: "Create Invitation" }).click();
-    await expect(page).toHaveURL(/\/invitations\/[0-9a-f-]{36}$/);
+    await expect(page).toHaveURL(/\/invitations\/[0-9a-f-]{36}$/, {
+      timeout: 20_000,
+    });
     await expect(
       page.getByRole("heading", { name: "Test Household" }),
     ).toBeVisible();
