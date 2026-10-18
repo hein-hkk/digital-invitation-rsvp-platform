@@ -22,6 +22,7 @@ export type InvitationErrorCode =
   | "AUTH_REQUIRED"
   | "EVENT_NOT_FOUND"
   | "INVITATION_NOT_FOUND"
+  | "INVITATION_REVOKED"
   | "EVENT_NOT_MUTABLE"
   | "INVITATION_INVALID"
   | "MAX_PARTY_SIZE_CONFLICT"
@@ -188,6 +189,84 @@ export function createInvitationOperations(context: InvitationContext) {
       return { invitation: data };
     },
 
+    async regenerateInvitationToken(eventId: string, invitationId: string) {
+      const workspace = await requireEvent(eventId);
+      if (!z.uuid().safeParse(invitationId).success) {
+        throw new InvitationServiceError("INVITATION_NOT_FOUND");
+      }
+      if (!workspace.canMutate) {
+        throw new InvitationServiceError("EVENT_NOT_MUTABLE");
+      }
+      // Scope the privileged credential operation to the authenticated owner.
+      const { data: invitation, error: invitationError } = await client
+        .from("invitations")
+        .select("id,revoked_at")
+        .eq("id", invitationId)
+        .eq("event_id", eventId)
+        .maybeSingle();
+      if (invitationError) {
+        throw new InvitationServiceError("INVITATION_PERSISTENCE_ERROR");
+      }
+      if (!invitation) throw new InvitationServiceError("INVITATION_NOT_FOUND");
+      if (invitation.revoked_at) {
+        throw new InvitationServiceError("INVITATION_REVOKED");
+      }
+      const credential = createInvitationCredential(tokenConfig);
+      const { data: tokenCreatedAt, error } = await credentialClient.rpc(
+        "replace_invitation_credential",
+        {
+          p_owner_user_id: organizerId,
+          p_invitation_id: invitationId,
+          p_token_lookup_hash: `\\x${credential.lookupHash.toString("hex")}`,
+          p_token_ciphertext: credential.ciphertext,
+          p_token_key_version: credential.keyVersion,
+        },
+      );
+      if (error || !tokenCreatedAt) {
+        if (error?.message === "EVENT_NOT_MUTABLE") {
+          throw new InvitationServiceError("EVENT_NOT_MUTABLE");
+        }
+        if (error?.message === "INVITATION_REVOKED") {
+          throw new InvitationServiceError("INVITATION_REVOKED");
+        }
+        if (error?.message === "INVITATION_UNAVAILABLE") {
+          throw new InvitationServiceError("INVITATION_NOT_FOUND");
+        }
+        throw new InvitationServiceError("INVITATION_PERSISTENCE_ERROR");
+      }
+      return {
+        currentInvitationUrl: invitationUrl(credential.rawToken, tokenConfig),
+        tokenCreatedAt,
+      };
+    },
+
+    async revokeInvitation(eventId: string, invitationId: string) {
+      const workspace = await requireEvent(eventId);
+      if (!z.uuid().safeParse(invitationId).success) {
+        throw new InvitationServiceError("INVITATION_NOT_FOUND");
+      }
+      if (!workspace.canMutate) {
+        throw new InvitationServiceError("EVENT_NOT_MUTABLE");
+      }
+      const { data: revokedAt, error } = await client.rpc(
+        "revoke_invitation_record",
+        { p_event_id: eventId, p_invitation_id: invitationId },
+      );
+      if (error || !revokedAt) {
+        if (error?.message === "EVENT_NOT_MUTABLE") {
+          throw new InvitationServiceError("EVENT_NOT_MUTABLE");
+        }
+        if (error?.message === "INVITATION_REVOKED") {
+          throw new InvitationServiceError("INVITATION_REVOKED");
+        }
+        if (error?.message === "INVITATION_UNAVAILABLE") {
+          throw new InvitationServiceError("INVITATION_NOT_FOUND");
+        }
+        throw new InvitationServiceError("INVITATION_PERSISTENCE_ERROR");
+      }
+      return { accessState: "revoked" as const, revokedAt };
+    },
+
     async getInvitationAdminDetail(eventId: string, invitationId: string) {
       const workspace = await requireEvent(eventId);
       if (!z.uuid().safeParse(invitationId).success) {
@@ -312,5 +391,22 @@ export async function updateInvitation(
     eventId,
     invitationId,
     values,
+  );
+}
+
+export async function regenerateInvitationToken(
+  eventId: string,
+  invitationId: string,
+) {
+  return (await organizerInvitationOperations()).regenerateInvitationToken(
+    eventId,
+    invitationId,
+  );
+}
+
+export async function revokeInvitation(eventId: string, invitationId: string) {
+  return (await organizerInvitationOperations()).revokeInvitation(
+    eventId,
+    invitationId,
   );
 }

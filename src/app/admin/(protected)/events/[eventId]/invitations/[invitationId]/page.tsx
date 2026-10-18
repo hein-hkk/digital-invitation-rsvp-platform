@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyInvitationLink } from "@/components/admin/copy-invitation-link";
+import { InvitationAccessActions } from "@/components/admin/invitation-access-actions";
 import {
   InvitationDetailForm,
   OrganizerRsvpForm,
 } from "@/components/admin/invitation-detail-forms";
-import { updateInvitationAction } from "@/modules/invitations/actions";
+import {
+  regenerateInvitationTokenAction,
+  revokeInvitationAction,
+  updateInvitationAction,
+} from "@/modules/invitations/actions";
 import { updateOrganizerRsvpAction } from "@/modules/rsvp/organizer-actions";
 import {
   getInvitationAdminDetail,
@@ -17,7 +22,12 @@ export default async function InvitationDetailPage({
   searchParams,
 }: {
   params: Promise<{ eventId: string; invitationId: string }>;
-  searchParams: Promise<{ invitationSaved?: string; rsvpSaved?: string }>;
+  searchParams: Promise<{
+    invitationSaved?: string;
+    rsvpSaved?: string;
+    regenerated?: string;
+    revoked?: string;
+  }>;
 }) {
   const { eventId, invitationId } = await params;
   const saved = await searchParams;
@@ -74,12 +84,21 @@ export default async function InvitationDetailPage({
           · Access: {accessState}
         </p>
       </header>
-      {(saved.invitationSaved === "1" || saved.rsvpSaved === "1") && (
+      {(saved.invitationSaved === "1" ||
+        saved.rsvpSaved === "1" ||
+        saved.regenerated === "1" ||
+        saved.revoked === "1") && (
         <p
           role="status"
           className="mt-5 rounded bg-success-soft p-4 text-success"
         >
-          {saved.rsvpSaved === "1" ? "RSVP saved." : "Invitation saved."}
+          {saved.revoked === "1"
+            ? "Guest access is revoked."
+            : saved.regenerated === "1"
+              ? "A new invitation link was created. The previous link no longer works."
+              : saved.rsvpSaved === "1"
+                ? "RSVP saved."
+                : "Invitation saved."}
         </p>
       )}
       {runtimeState === "draft" && (
@@ -110,6 +129,20 @@ export default async function InvitationDetailPage({
               ? "This Invitation is revoked."
               : "Guest access has ended."}
           </p>
+        )}
+        {canMutate && accessState === "active" && (
+          <InvitationAccessActions
+            regenerateAction={regenerateInvitationTokenAction.bind(
+              null,
+              eventId,
+              invitationId,
+            )}
+            revokeAction={revokeInvitationAction.bind(
+              null,
+              eventId,
+              invitationId,
+            )}
+          />
         )}
       </section>
       <section className="mt-6 rounded border border-border bg-surface p-6">

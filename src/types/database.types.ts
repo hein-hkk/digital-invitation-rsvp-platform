@@ -254,7 +254,11 @@ export type Database = {
           p_token_key_version: number;
           p_token_lookup_hash: string;
         };
-        Returns: undefined;
+        Returns: string;
+      };
+      revoke_invitation_record: {
+        Args: { p_event_id: string; p_invitation_id: string };
+        Returns: string;
       };
       submit_guest_rsvp: {
         Args: {

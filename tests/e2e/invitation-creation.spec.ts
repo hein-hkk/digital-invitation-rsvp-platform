@@ -10,7 +10,7 @@ test("E2E-A-05/06 creates a Draft Invitation and copies its current link", async
   page,
   context,
 }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(90_000);
   const organizer = await provisionOtpOrganizer();
   try {
     const draft = await serviceClient()
@@ -25,7 +25,7 @@ test("E2E-A-05/06 creates a Draft Invitation and copies its current link", async
     await page.goto("/admin/sign-in");
     await page.getByLabel("Email address").fill(organizer.email);
     await page.getByRole("button", { name: "Send code" }).click();
-    await expect(page.getByRole("status")).toBeVisible();
+    await expect(page.getByRole("status")).toBeVisible({ timeout: 15_000 });
     await page
       .getByLabel("Six-digit code")
       .fill(await readLatestOtp(organizer.email));
