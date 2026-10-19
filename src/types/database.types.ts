@@ -260,6 +260,15 @@ export type Database = {
         Args: { p_event_id: string; p_invitation_id: string };
         Returns: string;
       };
+      set_hero_image_reference: {
+        Args: {
+          p_event_id: string;
+          p_expected_previous_path: string | null;
+          p_owner_user_id: string;
+          p_storage_path: string | null;
+        };
+        Returns: string | null;
+      };
       submit_guest_rsvp: {
         Args: {
           p_attendee_count: number;
