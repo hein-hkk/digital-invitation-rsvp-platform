@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EventForm } from "@/components/admin/event-form";
+import { EventDeleteAction } from "@/components/admin/event-delete-action";
 import { HeroImageEditor } from "@/components/admin/hero-image-editor";
 import { getAdminHeroImageSignedUrl } from "@/modules/hero-image/service";
 import { getPublicSupabaseEnv } from "@/server/env";
 import {
+  deleteEventAction,
   publishEventAction,
   updateEventAction,
 } from "@/modules/events/actions";
@@ -125,6 +127,12 @@ export default async function EventSettingsPage({
         supabaseUrl={publicSupabase.NEXT_PUBLIC_SUPABASE_URL}
         supabaseAnonKey={publicSupabase.NEXT_PUBLIC_SUPABASE_ANON_KEY}
       />
+      {runtimeState !== "published" && (
+        <EventDeleteAction
+          eventTitle={event.event_title || "Untitled Event"}
+          action={deleteEventAction.bind(null, eventId)}
+        />
+      )}
     </main>
   );
 }

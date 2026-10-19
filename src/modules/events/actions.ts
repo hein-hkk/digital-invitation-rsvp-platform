@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import {
   createEventDraft,
+  deleteEvent,
   EventServiceError,
   publishEvent,
   updateEvent,
@@ -98,4 +99,33 @@ export async function publishEventAction(form: FormData): Promise<void> {
   revalidatePath(`/admin/events/${eventId}/settings`);
   if (outcome === "success") redirect(`/admin/events/${eventId}?published=1`);
   redirect(`/admin/events/${eventId}/settings?publish=${outcome}`);
+}
+
+export type EventDeleteState = { message: string | null };
+
+export async function deleteEventAction(
+  eventId: string,
+  _previous: EventDeleteState,
+  _form: FormData,
+): Promise<EventDeleteState> {
+  void _previous;
+  void _form;
+  try {
+    await deleteEvent(eventId);
+  } catch (error) {
+    if (error instanceof EventServiceError) {
+      if (error.code === "AUTH_REQUIRED") redirect("/admin/sign-in");
+      return {
+        message:
+          error.code === "EVENT_NOT_DELETABLE"
+            ? "This Event is active and cannot be deleted."
+            : error.code === "EVENT_NOT_FOUND"
+              ? "This Event is no longer available."
+              : "The Event could not be deleted. Try again.",
+      };
+    }
+    return { message: "The Event could not be deleted. Try again." };
+  }
+  revalidatePath("/admin/events");
+  redirect("/admin/events");
 }
