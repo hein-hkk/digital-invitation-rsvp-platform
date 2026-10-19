@@ -248,7 +248,19 @@ export type Database = {
         Args: { p_event_id: string; p_owner_user_id: string };
         Returns: string | null;
       };
+      consume_rate_limit: {
+        Args: {
+          p_bucket_hash: string;
+          p_max_attempts: number;
+          p_window_seconds: number;
+        };
+        Returns: boolean;
+      };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
+      purge_expired_rate_limit_attempts: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       replace_invitation_credential: {
         Args: {
           p_invitation_id: string;

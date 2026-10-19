@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { allowOrganizerHighImpact } from "@/server/rate-limit";
 import {
   HeroImageError,
   prepareHeroImageUpload,
@@ -34,6 +35,12 @@ export async function prepareHeroImageUploadAction(input: {
   contentType: string;
 }) {
   try {
+    if (!(await allowOrganizerHighImpact("heroUpload"))) {
+      return {
+        ok: false as const,
+        message: "Too many changes. Try again later.",
+      };
+    }
     const data = await prepareHeroImageUpload(input);
     return { ok: true as const, ...data };
   } catch (error) {
@@ -46,6 +53,12 @@ export async function setHeroImageReferenceAction(input: {
   storagePath: string;
 }) {
   try {
+    if (!(await allowOrganizerHighImpact("heroFinalize"))) {
+      return {
+        ok: false as const,
+        message: "Too many changes. Try again later.",
+      };
+    }
     await setHeroImageReference(input);
     refreshEvent(input.eventId);
     return { ok: true as const };
@@ -56,6 +69,12 @@ export async function setHeroImageReferenceAction(input: {
 
 export async function removeHeroImageAction(eventId: string) {
   try {
+    if (!(await allowOrganizerHighImpact("heroRemoval"))) {
+      return {
+        ok: false as const,
+        message: "Too many changes. Try again later.",
+      };
+    }
     await removeHeroImage(eventId);
     refreshEvent(eventId);
     return { ok: true as const };

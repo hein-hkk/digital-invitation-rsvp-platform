@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import { connection } from "next/server";
 import "@/styles/globals.css";
 
 const inter = Inter({
@@ -18,9 +19,11 @@ export const metadata: Metadata = {
   description: "Repository foundation",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Nonce-based CSP requires a fresh render for each request.
+  await connection();
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable}`}>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { allowOrganizerHighImpact } from "@/server/rate-limit";
 import {
   createInvitation,
   InvitationServiceError,
@@ -25,6 +26,13 @@ export async function createInvitationAction(
   const values = invitationValuesFromForm(form);
   let invitationId: string;
   try {
+    if (!(await allowOrganizerHighImpact("invitationCreate"))) {
+      return {
+        values,
+        fieldErrors: {},
+        message: "Too many changes. Try again later.",
+      };
+    }
     ({ invitationId } = await createInvitation(eventId, values));
   } catch (error) {
     if (error instanceof InvitationServiceError) {
@@ -80,6 +88,9 @@ export async function regenerateInvitationTokenAction(
   invitationId: string,
 ): Promise<InvitationAccessActionState> {
   try {
+    if (!(await allowOrganizerHighImpact("tokenRegeneration"))) {
+      return { message: "Too many changes. Try again later." };
+    }
     await regenerateInvitationToken(eventId, invitationId);
   } catch (error) {
     return { message: accessErrorMessage(error, "regenerate") };
@@ -96,6 +107,9 @@ export async function revokeInvitationAction(
   invitationId: string,
 ): Promise<InvitationAccessActionState> {
   try {
+    if (!(await allowOrganizerHighImpact("tokenRevocation"))) {
+      return { message: "Too many changes. Try again later." };
+    }
     await revokeInvitation(eventId, invitationId);
   } catch (error) {
     return { message: accessErrorMessage(error, "revoke") };

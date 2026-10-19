@@ -52,6 +52,16 @@ export function OrganizerSignIn() {
           Enter a valid email address.
         </p>
       )}
+      {request.status === "throttled" && (
+        <p role="alert" className="mt-3 text-danger">
+          Too many code requests. Try again later.
+        </p>
+      )}
+      {request.status === "unavailable" && (
+        <p role="alert" className="mt-3 text-danger">
+          Sign in is temporarily unavailable. Try again later.
+        </p>
+      )}
       {request.status === "sent" && (
         <section className="mt-8 border-t border-border pt-6">
           <p role="status" className="text-text-muted">

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
+import { allowOrganizerHighImpact } from "@/server/rate-limit";
 import {
   createEventDraft,
   deleteEvent,
@@ -80,7 +81,11 @@ export async function publishEventAction(form: FormData): Promise<void> {
   const eventId = parsed.data;
   let outcome: "success" | "blocked" | "failed" = "success";
   try {
-    await publishEvent(eventId);
+    if (!(await allowOrganizerHighImpact("eventPublication"))) {
+      outcome = "failed";
+    } else {
+      await publishEvent(eventId);
+    }
   } catch (error) {
     if (error instanceof EventServiceError) {
       if (error.code === "AUTH_REQUIRED") redirect("/admin/sign-in");
@@ -111,6 +116,9 @@ export async function deleteEventAction(
   void _previous;
   void _form;
   try {
+    if (!(await allowOrganizerHighImpact("eventDeletion"))) {
+      return { message: "Too many changes. Try again later." };
+    }
     await deleteEvent(eventId);
   } catch (error) {
     if (error instanceof EventServiceError) {

@@ -3,12 +3,13 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createActionAuthClient } from "@/server/auth/session";
+import { allowOrganizerOtp } from "@/server/rate-limit";
 
 const emailSchema = z.email().max(254);
 const otpSchema = z.string().regex(/^\d{6}$/);
 
 export type RequestOtpState = {
-  status: "idle" | "sent" | "error";
+  status: "idle" | "sent" | "error" | "throttled" | "unavailable";
   email: string;
 };
 export type VerifyOtpState = { status: "idle" | "error" };
@@ -19,6 +20,14 @@ export async function requestOrganizerOtp(
 ): Promise<RequestOtpState> {
   const email = emailSchema.safeParse(form.get("email"));
   if (!email.success) return { status: "error", email: "" };
+
+  try {
+    if (!(await allowOrganizerOtp(email.data))) {
+      return { status: "throttled", email: email.data };
+    }
+  } catch {
+    return { status: "unavailable", email: email.data };
+  }
 
   try {
     const client = await createActionAuthClient();
