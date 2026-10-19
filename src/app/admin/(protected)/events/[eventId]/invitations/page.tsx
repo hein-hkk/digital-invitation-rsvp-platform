@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ExportCsvButton } from "@/components/admin/export-csv-button";
 import {
   InvitationServiceError,
   listEventInvitations,
@@ -73,14 +74,17 @@ export default async function InvitationsPage({
           </p>
           <h1 className="font-display text-3xl font-semibold">Invitations</h1>
         </div>
-        {canMutate && (
-          <Link
-            href={`/admin/events/${eventId}/invitations/new`}
-            className="min-h-11 rounded bg-accent px-4 py-3 font-medium text-white"
-          >
-            Create Invitation
-          </Link>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          {canMutate && (
+            <Link
+              href={`/admin/events/${eventId}/invitations/new`}
+              className="min-h-11 rounded bg-accent px-4 py-3 font-medium text-white"
+            >
+              Create Invitation
+            </Link>
+          )}
+          <ExportCsvButton eventId={eventId} />
+        </div>
       </div>
       {runtimeState === "draft" && (
         <p className="mt-6 rounded bg-warning-soft p-4 text-warning">
