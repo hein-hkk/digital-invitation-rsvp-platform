@@ -1,5 +1,10 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  HERO_IMAGE_BUCKET,
+  HERO_IMAGE_SIGNED_READ_SECONDS,
+  isEventHeroImagePath,
+} from "@/modules/hero-image/validation";
 import { getGuestRsvpPermission } from "@/modules/rsvp/domain";
 import {
   isInvitationToken,
@@ -101,7 +106,7 @@ export function createGuestAccessService(context: {
       const eventResult = await client
         .from("events")
         .select(
-          "publication_status,event_date,start_time,end_time,event_timezone,host_display_names,venue_name,venue_address,venue_map_url,dress_code,invitation_message,venue_arrival_notes,organizer_contact_information,rsvp_deadline_local",
+          "publication_status,event_date,start_time,end_time,event_timezone,host_display_names,venue_name,venue_address,venue_map_url,dress_code,invitation_message,venue_arrival_notes,organizer_contact_information,rsvp_deadline_local,hero_image_storage_path",
         )
         .eq("id", invitation.event_id)
         .maybeSingle();
@@ -140,6 +145,23 @@ export function createGuestAccessService(context: {
       if (rsvpResult.error || !rsvpResult.data)
         throw new Error("Guest access unavailable");
       const rsvp = rsvpResult.data;
+      let heroImageSignedUrl: string | null = null;
+      if (
+        event.hero_image_storage_path &&
+        isEventHeroImagePath(invitation.event_id, event.hero_image_storage_path)
+      ) {
+        try {
+          const signed = await client.storage
+            .from(HERO_IMAGE_BUCKET)
+            .createSignedUrl(
+              event.hero_image_storage_path,
+              HERO_IMAGE_SIGNED_READ_SECONDS,
+            );
+          if (!signed.error) heroImageSignedUrl = signed.data.signedUrl;
+        } catch {
+          // Optional media must not prevent Event details or RSVP access.
+        }
+      }
       return {
         ok: true,
         value: {
@@ -158,7 +180,7 @@ export function createGuestAccessService(context: {
             invitationMessage: event.invitation_message,
             venueArrivalNotes: event.venue_arrival_notes,
             organizerContactInformation: event.organizer_contact_information,
-            heroImageSignedUrl: null,
+            heroImageSignedUrl,
             rsvpDeadlineLocal: event.rsvp_deadline_local,
           },
           rsvp: {

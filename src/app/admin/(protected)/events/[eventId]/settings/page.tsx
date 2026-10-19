@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EventForm } from "@/components/admin/event-form";
+import { HeroImageEditor } from "@/components/admin/hero-image-editor";
+import { getAdminHeroImageSignedUrl } from "@/modules/hero-image/service";
+import { getPublicSupabaseEnv } from "@/server/env";
 import {
   publishEventAction,
   updateEventAction,
@@ -32,6 +35,8 @@ export default async function EventSettingsPage({
   const publishResult = (await searchParams).publish;
   const publicationErrors =
     publishResult === "blocked" ? validateEventValues(values, true) : {};
+  const previewUrl = await getAdminHeroImageSignedUrl(eventId);
+  const publicSupabase = getPublicSupabaseEnv();
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <Link href={`/admin/events/${eventId}`} className="text-accent underline">
@@ -113,6 +118,13 @@ export default async function EventSettingsPage({
           )}
         </div>
       )}
+      <HeroImageEditor
+        eventId={eventId}
+        previewUrl={previewUrl}
+        mutable={runtimeState !== "ended"}
+        supabaseUrl={publicSupabase.NEXT_PUBLIC_SUPABASE_URL}
+        supabaseAnonKey={publicSupabase.NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      />
     </main>
   );
 }

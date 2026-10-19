@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GuestRsvpSection } from "@/components/guest/guest-rsvp-section";
+import { HeroImage } from "@/components/guest/hero-image";
 import {
   resolveGuestInvitation,
   type GuestInvitationView,
@@ -76,6 +77,8 @@ function GuestInvitation({
           </a>
         )}
       </header>
+
+      {event.heroImageSignedUrl && <HeroImage url={event.heroImageSignedUrl} />}
 
       <section
         aria-labelledby="event-details"
