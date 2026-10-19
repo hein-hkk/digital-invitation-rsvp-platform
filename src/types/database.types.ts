@@ -244,7 +244,10 @@ export type Database = {
         };
         Returns: string;
       };
-      delete_event_record: { Args: { p_event_id: string }; Returns: string };
+      delete_event_record: {
+        Args: { p_event_id: string; p_owner_user_id: string };
+        Returns: string | null;
+      };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
       replace_invitation_credential: {
         Args: {

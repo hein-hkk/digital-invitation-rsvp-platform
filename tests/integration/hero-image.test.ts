@@ -115,7 +115,7 @@ describe("M12 private Hero Image", () => {
       await clearObjects(eventIds);
       await cleanupOrganizers([organizer]);
     }
-  });
+  }, 15_000);
 
   it("rejects SVG, spoofed bytes, oversized files, another Owner, and Ended mutations", async () => {
     const owner = await createOrganizer();

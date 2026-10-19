@@ -346,8 +346,9 @@ describe("migrated schema and controlled operations", () => {
         })
       ).error,
     ).toBeNull();
-    const activeDelete = await organizer.client.rpc("delete_event_record", {
+    const activeDelete = await service.rpc("delete_event_record", {
       p_event_id: draftEventId,
+      p_owner_user_id: organizer.id,
     });
     expect(activeDelete.error).not.toBeNull();
 
@@ -379,8 +380,9 @@ describe("migrated schema and controlled operations", () => {
     expect(endedUpdate.error).not.toBeNull();
     expect(
       (
-        await organizer.client.rpc("delete_event_record", {
+        await service.rpc("delete_event_record", {
           p_event_id: endedId,
+          p_owner_user_id: organizer.id,
         })
       ).error,
     ).toBeNull();

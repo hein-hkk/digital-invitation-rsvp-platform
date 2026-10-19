@@ -1,14 +1,21 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import {
+  HERO_IMAGE_BUCKET,
+  isEventHeroImagePath,
+} from "@/modules/hero-image/validation";
 import { resolveOrganizerSession } from "@/server/auth/session";
+import { logger } from "@/server/observability/logger";
 import { createAuthenticatedSupabaseClient } from "@/server/supabase/authenticated";
+import { createServiceRoleSupabaseClient } from "@/server/supabase/service-role";
 import { productionClock, type Clock } from "@/server/time/clock";
 import type { Database } from "@/types/database.types";
 import {
   assertEventMutable,
   getEventRuntimeState,
   getGuestRsvpPolicy,
+  isEventDeletable,
 } from "./domain";
 import {
   emptyEventValues,
@@ -24,6 +31,7 @@ export type EventErrorCode =
   | "EVENT_NOT_FOUND"
   | "EVENT_NOT_MUTABLE"
   | "EVENT_NOT_PUBLISHABLE"
+  | "EVENT_NOT_DELETABLE"
   | "EVENT_INVALID"
   | "EVENT_PERSISTENCE_ERROR";
 
@@ -38,6 +46,8 @@ export class EventServiceError extends Error {
 
 export type EventContext = {
   client: SupabaseClient<Database>;
+  privilegedClient?: SupabaseClient<Database>;
+  removeHeroImageObject?: (path: string) => Promise<void>;
   organizerId: string;
   clock: Clock;
 };
@@ -52,7 +62,7 @@ function runtimeEvent(row: EventRow) {
 }
 
 export function createEventOperations(context: EventContext) {
-  const { client, organizerId, clock } = context;
+  const { client, privilegedClient, organizerId, clock } = context;
 
   async function requireOwnedEvent(eventId: string): Promise<EventRow> {
     if (!z.uuid().safeParse(eventId).success) {
@@ -223,10 +233,60 @@ export function createEventOperations(context: EventContext) {
         publishedAt: published.published_at!,
       };
     },
+
+    async deleteEvent(eventId: string) {
+      const event = await requireOwnedEvent(eventId);
+      if (!isEventDeletable(runtimeEvent(event), clock)) {
+        throw new EventServiceError("EVENT_NOT_DELETABLE");
+      }
+      if (!privilegedClient) {
+        throw new EventServiceError("EVENT_PERSISTENCE_ERROR");
+      }
+      const { data: heroPath, error } = await privilegedClient.rpc(
+        "delete_event_record",
+        { p_event_id: eventId, p_owner_user_id: organizerId },
+      );
+      if (error) {
+        throw new EventServiceError(
+          error.message === "Active Published Event cannot be deleted"
+            ? "EVENT_NOT_DELETABLE"
+            : error.message === "Event unavailable"
+              ? "EVENT_NOT_FOUND"
+              : "EVENT_PERSISTENCE_ERROR",
+        );
+      }
+      if (heroPath) {
+        if (!isEventHeroImagePath(eventId, heroPath)) {
+          logger.log("warn", {
+            operation: "eventDeleteHeroCleanup",
+            eventId,
+            errorCode: "invalidHeroImagePath",
+          });
+        } else {
+          try {
+            if (context.removeHeroImageObject) {
+              await context.removeHeroImageObject(heroPath);
+            } else {
+              const removed = await privilegedClient.storage
+                .from(HERO_IMAGE_BUCKET)
+                .remove([heroPath]);
+              if (removed.error) throw removed.error;
+            }
+          } catch {
+            logger.log("warn", {
+              operation: "eventDeleteHeroCleanup",
+              eventId,
+              errorCode: "storageRemoveFailed",
+            });
+          }
+        }
+      }
+      return { deletedEventId: eventId };
+    },
   };
 }
 
-async function organizerEventOperations() {
+async function organizerEventOperations(includePrivileged = false) {
   const session = await resolveOrganizerSession();
   if (!session) throw new EventServiceError("AUTH_REQUIRED");
   const { client, user } = await createAuthenticatedSupabaseClient(
@@ -234,6 +294,9 @@ async function organizerEventOperations() {
   );
   return createEventOperations({
     client,
+    privilegedClient: includePrivileged
+      ? createServiceRoleSupabaseClient()
+      : undefined,
     organizerId: user.id,
     clock: productionClock,
   });
@@ -264,4 +327,8 @@ export async function updateEvent(
 
 export async function publishEvent(eventId: string) {
   return (await organizerEventOperations()).publishEvent(eventId);
+}
+
+export async function deleteEvent(eventId: string) {
+  return (await organizerEventOperations(true)).deleteEvent(eventId);
 }
