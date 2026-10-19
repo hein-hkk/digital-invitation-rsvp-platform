@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { allowGuestRsvp } from "@/server/rate-limit";
 import {
   GuestRsvpServiceError,
   submitGuestRsvp,
@@ -13,6 +14,21 @@ export async function submitGuestRsvpAction(
   _previous: GuestRsvpFormState,
   form: FormData,
 ): Promise<GuestRsvpFormState> {
+  try {
+    if (!(await allowGuestRsvp(rawToken))) {
+      return {
+        kind: "invalid",
+        message: "Too many RSVP attempts. Try again later.",
+        fieldErrors: {},
+      };
+    }
+  } catch {
+    return {
+      kind: "invalid",
+      message: "RSVP is temporarily unavailable. Try again later.",
+      fieldErrors: {},
+    };
+  }
   const status = form.get("status");
   if (status !== "attending" && status !== "declined") {
     return {
