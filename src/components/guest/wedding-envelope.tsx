@@ -1,12 +1,33 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { weddingScript } from "@/components/wedding/fonts";
+import { monogramInitials } from "@/components/wedding/format";
+import { HostNames, hostNamesClass } from "@/components/wedding/host-names";
 
 type WeddingEnvelopeProps = {
   hostNames: string[];
   initiallyOpen?: boolean;
   children: ReactNode;
 };
+
+type Phase = "closed" | "opening" | "open";
+
+// Longer than the CSS opening sequence; only used if `animationend` is missed.
+const OPENING_FALLBACK_MS = 3000;
+
+function FlapEdge({ points }: { points: string }) {
+  return (
+    <svg
+      className="wedding-envelope__edge"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      focusable="false"
+    >
+      <polyline points={points} vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
 
 export function WeddingEnvelope({
   hostNames,
@@ -15,19 +36,18 @@ export function WeddingEnvelope({
 }: WeddingEnvelopeProps) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const hosts = new Intl.ListFormat("en", {
-    style: "long",
-    type: "conjunction",
-  }).format(hostNames);
-  const monogram = hostNames
-    .slice(0, 2)
-    .map((name) => name.trim().charAt(0).toUpperCase())
-    .filter(Boolean)
-    .join(" & ");
+  const fallbackTimer = useRef<number | null>(null);
+  const [phase, setPhase] = useState<Phase>(initiallyOpen ? "open" : "closed");
+  const initials = monogramInitials(hostNames);
 
-  useEffect(() => {
-    if (detailsRef.current) detailsRef.current.dataset.enhanced = "true";
-  }, []);
+  useEffect(
+    () => () => {
+      if (fallbackTimer.current !== null) {
+        window.clearTimeout(fallbackTimer.current);
+      }
+    },
+    [],
+  );
 
   function focusInvitation() {
     contentRef.current?.querySelector<HTMLElement>("h1")?.focus({
@@ -35,82 +55,110 @@ export function WeddingEnvelope({
     });
   }
 
+  function finishOpening() {
+    if (fallbackTimer.current !== null) {
+      window.clearTimeout(fallbackTimer.current);
+      fallbackTimer.current = null;
+    }
+    setPhase("open");
+    focusInvitation();
+  }
+
   return (
-    <main>
+    <main className={weddingScript.variable}>
       <details
         ref={detailsRef}
         className={`wedding-envelope${initiallyOpen ? " wedding-envelope--skip" : ""}`}
         open={initiallyOpen}
+        data-phase={phase}
         onToggle={(event) => {
-          if (
-            !initiallyOpen &&
-            event.currentTarget.open &&
-            window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ) {
+          if (initiallyOpen || !event.currentTarget.open) return;
+          if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            setPhase("open");
             focusInvitation();
           }
         }}
       >
         <summary
           className="wedding-envelope__cover"
+          onClick={(event) => {
+            // The cover stays mounted while it animates away; a second
+            // activation must not close the Invitation again.
+            if (phase !== "closed") {
+              event.preventDefault();
+              return;
+            }
+            // Without an opening sequence the server-rendered "closed" phase
+            // plus the native open state reveals the Invitation immediately.
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+              return;
+            }
+            setPhase("opening");
+            fallbackTimer.current = window.setTimeout(
+              finishOpening,
+              OPENING_FALLBACK_MS,
+            );
+          }}
           onAnimationEnd={(event) => {
             if (
               event.target === event.currentTarget &&
-              detailsRef.current?.open
+              event.animationName === "wedding-cover-exit"
             ) {
-              focusInvitation();
+              finishOpening();
             }
           }}
         >
-          <span className="wedding-envelope__frame" aria-hidden="true" />
-          <span className="wedding-envelope__scene">
+          <span className="wedding-envelope__stage" aria-hidden="true">
+            <span className="wedding-envelope__shade" />
+            <span className="wedding-envelope__flap wedding-envelope__flap--left">
+              <span className="wedding-envelope__paper" />
+            </span>
+            <span className="wedding-envelope__flap wedding-envelope__flap--right">
+              <span className="wedding-envelope__paper" />
+            </span>
+            <span className="wedding-envelope__flap wedding-envelope__flap--bottom">
+              <span className="wedding-envelope__paper" />
+              <FlapEdge points="0,100 50,46 100,100" />
+            </span>
+            <span className="wedding-envelope__flap wedding-envelope__flap--top">
+              <span className="wedding-envelope__paper" />
+              <FlapEdge points="0,22 50,57 100,22" />
+              <FlapEdge points="0,17 50,52 100,17" />
+            </span>
+            <span className="wedding-envelope__seal">
+              <span className="wedding-envelope__seal-face">
+                {initials.length > 0 ? (
+                  <>
+                    {initials[0]}
+                    {initials[1] && (
+                      <>
+                        <span className="wedding-envelope__seal-amp">
+                          &amp;
+                        </span>
+                        {initials[1]}
+                      </>
+                    )}
+                  </>
+                ) : (
+                  "✧"
+                )}
+              </span>
+            </span>
+          </span>
+          <span className="wedding-envelope__text">
             <span className="wedding-envelope__eyebrow">
               We’re getting married
             </span>
             <span
-              className="wedding-envelope__names"
+              className={`wedding-envelope__names ${hostNamesClass(hostNames)}`}
               role="heading"
               aria-level={1}
             >
-              {hosts}
+              <HostNames names={hostNames} />
             </span>
-            <span className="wedding-envelope__illustration" aria-hidden="true">
-              <svg
-                className="wedding-envelope__sprig wedding-envelope__sprig--left"
-                viewBox="0 0 110 180"
-                fill="none"
-              >
-                <path d="M99 170C72 134 41 107 38 13" />
-                <path d="M67 132C38 130 20 115 10 92M51 96C24 92 13 76 8 54M42 54C62 50 76 36 82 13" />
-                <path d="M37 115C29 98 18 96 8 99c5 14 15 22 29 16ZM28 78C20 60 12 58 3 61c3 14 10 22 25 17ZM49 62c17-8 27-21 29-36-17 3-27 13-29 36ZM54 103c17-4 29-15 35-30-18-1-29 8-35 30Z" />
-                <circle cx="38" cy="13" r="7" />
-                <circle cx="8" cy="54" r="5" />
-              </svg>
-              <span className="wedding-envelope__paper-back" />
-              <span className="wedding-envelope__letter">
-                <span className="wedding-envelope__letter-mark">✧</span>
-                <span className="wedding-envelope__letter-rule" />
-              </span>
-              <span className="wedding-envelope__fold wedding-envelope__fold--left" />
-              <span className="wedding-envelope__fold wedding-envelope__fold--right" />
-              <span className="wedding-envelope__front" />
-              <span className="wedding-envelope__flap" />
-              <span className="wedding-envelope__seal">{monogram || "✧"}</span>
-              <svg
-                className="wedding-envelope__sprig wedding-envelope__sprig--right"
-                viewBox="0 0 110 180"
-                fill="none"
-              >
-                <path d="M99 170C72 134 41 107 38 13" />
-                <path d="M67 132C38 130 20 115 10 92M51 96C24 92 13 76 8 54M42 54C62 50 76 36 82 13" />
-                <path d="M37 115C29 98 18 96 8 99c5 14 15 22 29 16ZM28 78C20 60 12 58 3 61c3 14 10 22 25 17ZM49 62c17-8 27-21 29-36-17 3-27 13-29 36ZM54 103c17-4 29-15 35-30-18-1-29 8-35 30Z" />
-                <circle cx="38" cy="13" r="7" />
-                <circle cx="8" cy="54" r="5" />
-              </svg>
-            </span>
-
-            <span className="wedding-envelope__hint">Open the envelope</span>
           </span>
+          <span className="wedding-envelope__hint">Tap to open</span>
+          <span className="wedding-envelope__focus" aria-hidden="true" />
         </summary>
         <div ref={contentRef} className="wedding-envelope__content">
           {children}

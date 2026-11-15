@@ -2,6 +2,19 @@ import type { Metadata } from "next";
 import { GuestRsvpSection } from "@/components/guest/guest-rsvp-section";
 import { HeroImage } from "@/components/guest/hero-image";
 import { WeddingEnvelope } from "@/components/guest/wedding-envelope";
+import { CelebrationSummary } from "@/components/wedding/celebration-summary";
+import { deadlineLabel, monogramInitials } from "@/components/wedding/format";
+import { HostNames, hostNamesClass } from "@/components/wedding/host-names";
+import {
+  ArrowOutIcon,
+  AttireIcon,
+  ContactIcon,
+  Crest,
+  Flourish,
+  PinIcon,
+} from "@/components/wedding/ornaments";
+import { RevealRoot } from "@/components/wedding/reveal-root";
+import { WeddingFooter } from "@/components/wedding/wedding-footer";
 import {
   resolveGuestInvitation,
   type GuestInvitationView,
@@ -16,31 +29,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-function dateLabel(date: string): string {
-  const [year, month, day] = date.split("-").map(Number);
-  return new Intl.DateTimeFormat("en", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, day, 12)));
-}
-
-function timeLabel(time: string): string {
-  const [hour, minute] = time.split(":").map(Number);
-  return new Intl.DateTimeFormat("en", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(2000, 0, 1, hour, minute)));
-}
-
-function deadlineLabel(deadline: string): string {
-  const [date, time] = deadline.split("T");
-  return `${dateLabel(date)} at ${timeLabel(time)}`;
-}
-
 function GuestInvitation({
   invitation,
   token,
@@ -51,132 +39,176 @@ function GuestInvitation({
   saved: boolean;
 }) {
   const { event, rsvp, permission } = invitation;
-  const hosts = new Intl.ListFormat("en", {
-    style: "long",
-    type: "conjunction",
-  }).format(event.hostDisplayNames);
+  const hosts = event.hostDisplayNames;
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-16 pt-12 sm:px-8 sm:pt-20">
-      <header className="text-center">
-        <p className="text-xs font-semibold tracking-[0.2em] text-accent uppercase">
+    <RevealRoot>
+      <header className="wedding-hero wedding-shell">
+        <div data-reveal="zoom">
+          <Crest initials={monogramInitials(hosts)} />
+        </div>
+        <p className="wedding-eyebrow" data-reveal="up" data-reveal-delay="1">
           You’re invited
         </p>
         <h1
           tabIndex={-1}
-          className="mt-5 font-display text-4xl leading-tight text-text sm:text-6xl"
+          className={hostNamesClass(hosts)}
+          data-reveal="up"
+          data-reveal-delay="2"
         >
-          {hosts}
+          <HostNames names={hosts} />
         </h1>
-        <p className="mt-9 text-sm text-text-muted">For</p>
-        <p className="mt-1 font-display text-2xl text-text sm:text-3xl">
-          {invitation.inviteeName}
-        </p>
+        <div data-reveal="fade" data-reveal-delay="3">
+          <Flourish />
+        </div>
+        <div className="wedding-invitee" data-reveal="up" data-reveal-delay="4">
+          <p className="wedding-label">For</p>
+          <p className="wedding-invitee__name">{invitation.inviteeName}</p>
+        </div>
         {permission.canEditRsvp && (
-          <a
-            href="#rsvp"
-            className="mt-8 inline-flex min-h-11 items-center rounded-md bg-accent px-7 py-2 font-semibold text-white hover:bg-accent-hover"
+          <p
+            className="wedding-hero__action"
+            data-reveal="up"
+            data-reveal-delay="5"
           >
-            RSVP
-          </a>
+            <a href="#rsvp" className="wedding-button">
+              RSVP
+            </a>
+          </p>
         )}
       </header>
 
       {event.heroImageSignedUrl && <HeroImage url={event.heroImageSignedUrl} />}
 
-      <section
-        aria-labelledby="event-details"
-        className="mt-14 border-y border-border py-9 text-center sm:mt-20"
-      >
-        <h2 id="event-details" className="font-display text-2xl sm:text-3xl">
-          The celebration
-        </h2>
-        <p className="mt-6 text-lg font-medium">{dateLabel(event.eventDate)}</p>
-        <p className="mt-1 text-text-muted">
-          {timeLabel(event.startTime)}
-          {event.endTime ? ` – ${timeLabel(event.endTime)}` : null}
-        </p>
-        <div className="mt-7">
-          <p className="font-medium">{event.venueName}</p>
-          <p className="mt-1 whitespace-pre-line text-text-muted">
-            {event.venueAddress}
-          </p>
-        </div>
-      </section>
+      <CelebrationSummary
+        headingId="event-details"
+        eventDate={event.eventDate}
+        startTime={event.startTime}
+        endTime={event.endTime}
+        eventTimezone={event.eventTimezone}
+        venueName={event.venueName}
+        venueAddress={event.venueAddress}
+      />
 
       {event.invitationMessage && (
         <section
           aria-labelledby="invitation-message"
-          className="mt-12 text-center"
+          className="wedding-message wedding-shell"
         >
-          <h2 id="invitation-message" className="font-display text-2xl">
+          <span
+            className="wedding-message__mark"
+            aria-hidden="true"
+            data-reveal="zoom"
+          />
+          <h2
+            id="invitation-message"
+            className="wedding-label"
+            data-reveal="up"
+          >
             A note from your hosts
           </h2>
-          <p className="mt-5 whitespace-pre-wrap break-words leading-8 text-text-muted">
+          <p
+            className="wedding-message__body"
+            data-reveal="up"
+            data-reveal-delay="1"
+          >
             {event.invitationMessage}
           </p>
+          <p
+            className="wedding-message__signature"
+            aria-hidden="true"
+            data-reveal="up"
+            data-reveal-delay="2"
+          >
+            <HostNames names={hosts} />
+          </p>
         </section>
       )}
 
-      <GuestRsvpSection
-        rsvp={rsvp}
-        maximumPartySize={invitation.maximumPartySize}
-        canEdit={permission.canEditRsvp}
-        deadlineLabel={
-          event.rsvpDeadlineLocal
-            ? deadlineLabel(event.rsvpDeadlineLocal)
-            : null
-        }
-        saved={saved}
-        action={submitGuestRsvpAction.bind(null, token)}
-      />
+      {/* A just-saved RSVP confirmation is never held back by an entrance. */}
+      <div className="wedding-shell" data-reveal={saved ? undefined : "up"}>
+        <GuestRsvpSection
+          rsvp={rsvp}
+          maximumPartySize={invitation.maximumPartySize}
+          canEdit={permission.canEditRsvp}
+          deadlineLabel={
+            event.rsvpDeadlineLocal
+              ? deadlineLabel(event.rsvpDeadlineLocal)
+              : null
+          }
+          saved={saved}
+          action={submitGuestRsvpAction.bind(null, token)}
+        />
+      </div>
 
-      {(event.venueArrivalNotes || event.venueMapUrl) && (
-        <section
-          aria-labelledby="venue-details"
-          className="mt-12 border-t border-border pt-9"
-        >
-          <h2 id="venue-details" className="font-display text-2xl">
-            Venue details
-          </h2>
-          {event.venueArrivalNotes && (
-            <p className="mt-4 whitespace-pre-wrap break-words leading-7 text-text-muted">
-              {event.venueArrivalNotes}
-            </p>
-          )}
-          {event.venueMapUrl && (
-            <a
-              className="mt-5 inline-flex min-h-11 items-center font-medium text-accent underline underline-offset-4"
-              href={event.venueMapUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+      {(event.venueArrivalNotes ||
+        event.venueMapUrl ||
+        event.dressCode ||
+        event.organizerContactInformation) && (
+        <div className="wedding-details wedding-shell">
+          {(event.venueArrivalNotes || event.venueMapUrl) && (
+            <section
+              aria-labelledby="venue-details"
+              className="wedding-detail"
+              data-reveal="up"
             >
-              View on Map
-            </a>
+              <PinIcon />
+              <h2 id="venue-details" className="wedding-detail__title">
+                Venue details
+              </h2>
+              {event.venueArrivalNotes && (
+                <p className="wedding-detail__text">
+                  {event.venueArrivalNotes}
+                </p>
+              )}
+              {event.venueMapUrl && (
+                <a
+                  className="wedding-button wedding-button--quiet"
+                  href={event.venueMapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on Map
+                  <ArrowOutIcon />
+                </a>
+              )}
+            </section>
           )}
-        </section>
+          {event.dressCode && (
+            <section
+              aria-labelledby="dress-code"
+              className="wedding-detail"
+              data-reveal="up"
+              data-reveal-delay="1"
+            >
+              <AttireIcon />
+              <h2 id="dress-code" className="wedding-detail__title">
+                Dress Code
+              </h2>
+              <p className="wedding-detail__text">{event.dressCode}</p>
+            </section>
+          )}
+          {event.organizerContactInformation && (
+            <section
+              aria-labelledby="questions"
+              className="wedding-detail"
+              data-reveal="up"
+              data-reveal-delay="2"
+            >
+              <ContactIcon />
+              <h2 id="questions" className="wedding-detail__title">
+                Questions?
+              </h2>
+              <p className="wedding-detail__text">
+                {event.organizerContactInformation}
+              </p>
+            </section>
+          )}
+        </div>
       )}
-      {event.dressCode && (
-        <section aria-labelledby="dress-code" className="mt-10">
-          <h2 id="dress-code" className="font-display text-2xl">
-            Dress Code
-          </h2>
-          <p className="mt-3 whitespace-pre-wrap break-words text-text-muted">
-            {event.dressCode}
-          </p>
-        </section>
-      )}
-      {event.organizerContactInformation && (
-        <section aria-labelledby="questions" className="mt-10">
-          <h2 id="questions" className="font-display text-2xl">
-            Questions?
-          </h2>
-          <p className="mt-3 whitespace-pre-wrap break-words text-text-muted">
-            {event.organizerContactInformation}
-          </p>
-        </section>
-      )}
-    </div>
+
+      <WeddingFooter hostNames={hosts} />
+    </RevealRoot>
   );
 }
 

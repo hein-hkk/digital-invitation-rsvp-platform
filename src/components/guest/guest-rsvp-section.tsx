@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import { SavedMark } from "@/components/wedding/ornaments";
 import type { GuestInvitationView } from "@/modules/guest-access/service";
 import {
   initialGuestRsvpFormState,
@@ -18,7 +19,7 @@ function SubmitButton({ responded }: { responded: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="mt-6 min-h-11 w-full rounded-md bg-accent px-5 py-3 font-semibold text-white hover:bg-accent-hover disabled:opacity-60"
+      className="wedding-button wedding-button--block"
     >
       {pending ? "Saving…" : responded ? "Save Changes" : "Submit RSVP"}
     </button>
@@ -27,29 +28,28 @@ function SubmitButton({ responded }: { responded: boolean }) {
 
 function SavedSummary({ rsvp }: { rsvp: Rsvp }) {
   return (
-    <div className="mt-5 space-y-3">
-      <p className="font-medium">
+    <div className="wedding-rsvp__summary">
+      <SavedMark />
+      <p className="wedding-rsvp__status">
         {rsvp.status === "attending" ? "Attending" : "Declined"}
       </p>
       {rsvp.status === "attending" && (
         <>
-          <p className="text-text-muted">{rsvp.attendeeCount} attending</p>
+          <p className="wedding-rsvp__count">{rsvp.attendeeCount} attending</p>
           {rsvp.attendeeNames.length > 0 && (
-            <ul className="list-inside list-disc text-text-muted">
+            <ul className="wedding-rsvp__names">
               {rsvp.attendeeNames.map((name, index) => (
                 <li key={index}>{name}</li>
               ))}
             </ul>
           )}
           {rsvp.dietaryRequirements && (
-            <p className="whitespace-pre-wrap break-words text-text-muted">
-              {rsvp.dietaryRequirements}
-            </p>
+            <p className="wedding-rsvp__note">{rsvp.dietaryRequirements}</p>
           )}
         </>
       )}
       {rsvp.guestMessage && (
-        <p className="whitespace-pre-wrap break-words text-text-muted">
+        <p className="wedding-rsvp__note wedding-rsvp__note--message">
           {rsvp.guestMessage}
         </p>
       )}
@@ -102,32 +102,30 @@ export function GuestRsvpSection({
   const formMessage = state.fieldErrors.status ? null : state.message;
 
   return (
-    <section
-      id="rsvp"
-      aria-labelledby="rsvp-heading"
-      className="mt-14 rounded-xl border border-border bg-surface px-5 py-7 shadow-sm sm:px-9"
-    >
-      <h2 id="rsvp-heading" className="font-display text-2xl">
-        RSVP
-      </h2>
+    <section id="rsvp" aria-labelledby="rsvp-heading" className="wedding-rsvp">
+      <div className="wedding-rsvp__header">
+        <p className="wedding-eyebrow">Kindly respond</p>
+        <h2 id="rsvp-heading" className="wedding-title">
+          RSVP
+        </h2>
+        {canEdit && deadlineLabel && (
+          <p className="wedding-rsvp__deadline">
+            Please RSVP by {deadlineLabel}.
+          </p>
+        )}
+      </div>
       {!canEdit && (
-        <p
-          role="status"
-          className="mt-4 rounded-md bg-warning-soft px-4 py-3 text-sm text-text"
-        >
+        <p role="status" className="wedding-alert wedding-alert--warning">
           RSVP changes are now closed.
         </p>
       )}
       {saved && responded && (
-        <p role="status" className="mt-4 text-sm font-semibold text-success">
+        <p role="status" className="wedding-alert wedding-alert--success">
           Your RSVP has been saved.
         </p>
       )}
       {formMessage && (
-        <p
-          role="alert"
-          className="mt-4 rounded-md bg-danger-soft px-4 py-3 text-sm text-danger"
-        >
+        <p role="alert" className="wedding-alert wedding-alert--danger">
           {formMessage}
         </p>
       )}
@@ -136,7 +134,9 @@ export function GuestRsvpSection({
         responded ? (
           <SavedSummary rsvp={rsvp} />
         ) : (
-          <p className="mt-5 font-medium">Awaiting Response</p>
+          <p className="wedding-rsvp__status wedding-rsvp__status--quiet">
+            Awaiting Response
+          </p>
         )
       ) : responded && !editing ? (
         <>
@@ -144,7 +144,7 @@ export function GuestRsvpSection({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="mt-6 min-h-11 rounded-md border border-accent px-5 py-2 font-semibold text-accent hover:bg-accent-soft"
+            className="wedding-button wedding-button--quiet wedding-rsvp__update"
           >
             Update RSVP
           </button>
@@ -152,7 +152,7 @@ export function GuestRsvpSection({
       ) : (
         <form
           action={formAction}
-          className="mt-6 space-y-6"
+          className="wedding-form"
           onSubmit={(event) => {
             if (tooManyNames) {
               event.preventDefault();
@@ -161,12 +161,15 @@ export function GuestRsvpSection({
           }}
         >
           <fieldset>
-            <legend className="font-medium">Will you be attending?</legend>
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <legend className="wedding-form__question">
+              Will you be attending?
+            </legend>
+            <div className="wedding-choices">
               {(["attending", "declined"] as const).map((option) => (
                 <label
                   key={option}
-                  className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-md border px-4 py-3 ${choice === option ? "border-accent bg-accent-soft" : "border-border"}`}
+                  className="wedding-choice"
+                  data-selected={choice === option ? "true" : undefined}
                 >
                   <input
                     type="radio"
@@ -174,32 +177,29 @@ export function GuestRsvpSection({
                     value={option}
                     checked={choice === option}
                     onChange={() => setChoice(option)}
-                    className="accent-accent"
+                    className="wedding-choice__input"
                     aria-describedby={statusError ? "status-error" : undefined}
                   />
-                  <span className="font-medium">
+                  <span className="wedding-choice__label">
                     {option === "attending" ? "Attending" : "Declined"}
                   </span>
                 </label>
               ))}
             </div>
             {statusError && (
-              <p id="status-error" className="mt-2 text-sm text-danger">
+              <p id="status-error" className="wedding-form__error">
                 {statusError}
               </p>
             )}
           </fieldset>
 
           {choice === "attending" && (
-            <>
+            <div className="wedding-form__group wedding-form__reveal">
               <div>
-                <label htmlFor="attendee-count" className="block font-medium">
+                <label htmlFor="attendee-count" className="wedding-form__label">
                   How many people will attend?
                 </label>
-                <p
-                  id="party-size-help"
-                  className="mt-1 text-sm text-text-muted"
-                >
+                <p id="party-size-help" className="wedding-form__help">
                   This invitation is for up to {maximumPartySize} people.
                 </p>
                 <select
@@ -213,7 +213,7 @@ export function GuestRsvpSection({
                       : "party-size-help"
                   }
                   aria-invalid={Boolean(state.fieldErrors.attendeeCount)}
-                  className="mt-3 min-h-11 w-full rounded-md border border-border bg-surface px-3"
+                  className="wedding-input wedding-input--select"
                 >
                   <option value="">Select number of attendees</option>
                   {Array.from({ length: maximumPartySize }, (_, index) => (
@@ -223,29 +223,27 @@ export function GuestRsvpSection({
                   ))}
                 </select>
                 {state.fieldErrors.attendeeCount && (
-                  <p id="count-error" className="mt-2 text-sm text-danger">
+                  <p id="count-error" className="wedding-form__error">
                     {state.fieldErrors.attendeeCount}
                   </p>
                 )}
               </div>
 
               <fieldset>
-                <legend className="font-medium">
+                <legend className="wedding-form__label">
                   Attendee names{" "}
-                  <span className="text-sm font-normal text-text-muted">
-                    (optional)
-                  </span>
+                  <span className="wedding-form__optional">(optional)</span>
                 </legend>
-                <p className="mt-1 text-sm text-text-muted">
+                <p className="wedding-form__help">
                   You can add names for some or all attendees.
                 </p>
-                <div className="mt-3 space-y-3">
+                <div className="wedding-form__names">
                   {names.map((name, index) => (
-                    <div key={index} className="flex items-end gap-2">
-                      <div className="min-w-0 flex-1">
+                    <div key={index} className="wedding-form__name-row">
+                      <div className="wedding-form__name-field">
                         <label
                           htmlFor={`attendee-name-${index}`}
-                          className="block text-sm"
+                          className="wedding-form__help"
                         >
                           Attendee name {index + 1}
                         </label>
@@ -261,7 +259,7 @@ export function GuestRsvpSection({
                             );
                             setNameError(false);
                           }}
-                          className="mt-1 min-h-11 w-full rounded-md border border-border px-3"
+                          className="wedding-input"
                           aria-invalid={nameError || tooManyNames}
                         />
                       </div>
@@ -274,7 +272,7 @@ export function GuestRsvpSection({
                           setNameError(false);
                         }}
                         aria-label={`Remove attendee name ${index + 1}`}
-                        className="min-h-11 rounded-md border border-border px-3 text-sm font-medium"
+                        className="wedding-form__remove"
                       >
                         Remove
                       </button>
@@ -284,7 +282,7 @@ export function GuestRsvpSection({
                 {(nameError ||
                   tooManyNames ||
                   state.fieldErrors.attendeeNames) && (
-                  <p role="alert" className="mt-2 text-sm text-danger">
+                  <p role="alert" className="wedding-form__error">
                     You have more attendee names than the selected attendee
                     count.
                   </p>
@@ -293,7 +291,7 @@ export function GuestRsvpSection({
                   <button
                     type="button"
                     onClick={() => setNames((current) => [...current, ""])}
-                    className="mt-3 min-h-11 rounded-md border border-accent px-4 py-2 font-medium text-accent"
+                    className="wedding-form__add"
                   >
                     Add attendee name
                   </button>
@@ -303,44 +301,38 @@ export function GuestRsvpSection({
               <div>
                 <label
                   htmlFor="dietary-requirements"
-                  className="block font-medium"
+                  className="wedding-form__label"
                 >
                   Dietary requirements{" "}
-                  <span className="text-sm font-normal text-text-muted">
-                    (optional)
-                  </span>
+                  <span className="wedding-form__optional">(optional)</span>
                 </label>
-                <p className="mt-1 text-sm text-text-muted">
-                  For the RSVP as a whole.
-                </p>
+                <p className="wedding-form__help">For the RSVP as a whole.</p>
                 <textarea
                   id="dietary-requirements"
                   name="dietaryRequirements"
                   value={dietary}
                   onChange={(event) => setDietary(event.target.value)}
                   rows={3}
-                  className="mt-2 w-full rounded-md border border-border px-3 py-2"
+                  className="wedding-input wedding-input--area"
                 />
               </div>
-            </>
+            </div>
           )}
 
           {choice === "declined" &&
             responded &&
             rsvp.status === "attending" && (
-              <p className="rounded-md bg-warning-soft px-4 py-3 text-sm text-text">
+              <p className="wedding-alert wedding-alert--warning">
                 Changing to Declined will remove the attendee count, attendee
                 names, and dietary requirements from your RSVP.
               </p>
             )}
 
           {(choice === "attending" || choice === "declined") && (
-            <div>
-              <label htmlFor="guest-message" className="block font-medium">
+            <div className="wedding-form__reveal">
+              <label htmlFor="guest-message" className="wedding-form__label">
                 Message for the hosts{" "}
-                <span className="text-sm font-normal text-text-muted">
-                  (optional)
-                </span>
+                <span className="wedding-form__optional">(optional)</span>
               </label>
               <textarea
                 id="guest-message"
@@ -348,7 +340,7 @@ export function GuestRsvpSection({
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 rows={3}
-                className="mt-2 w-full rounded-md border border-border px-3 py-2"
+                className="wedding-input wedding-input--area"
               />
             </div>
           )}
@@ -357,18 +349,12 @@ export function GuestRsvpSection({
             <button
               type="button"
               onClick={() => setEditing(false)}
-              className="min-h-11 w-full rounded-md px-4 py-2 text-sm font-medium text-text-muted underline"
+              className="wedding-form__cancel"
             >
               Cancel
             </button>
           )}
         </form>
-      )}
-
-      {canEdit && deadlineLabel && (
-        <p className="mt-5 text-sm text-text-muted">
-          Please RSVP by {deadlineLabel}.
-        </p>
       )}
     </section>
   );

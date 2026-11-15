@@ -141,6 +141,9 @@ test("Owner enables an unlisted public Event page without exposing Invitation de
     await expect(
       page.getByRole("heading", { name: "The celebration" }),
     ).toBeVisible();
+    // The cover leaves once the opening sequence and intro entrance finish.
+    await expect(publicEnvelope).toBeHidden();
+    await expect(page.locator(".wedding-envelope__content h1")).toBeFocused();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,

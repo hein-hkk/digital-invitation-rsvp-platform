@@ -42,14 +42,10 @@ export default async function PublicEventPage({
   if (!event) notFound();
   return (
     <WeddingEnvelope hostNames={event.hostDisplayNames}>
-      <div>
-        <EventAnnouncement
-          event={event}
-          coverUrl={
-            event.hasCover ? `/events/${event.publicPageId}/cover` : null
-          }
-        />
-      </div>
+      <EventAnnouncement
+        event={event}
+        coverUrl={event.hasCover ? `/events/${event.publicPageId}/cover` : null}
+      />
     </WeddingEnvelope>
   );
 }

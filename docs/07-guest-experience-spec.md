@@ -132,6 +132,14 @@ intro. A saved RSVP confirmation must appear immediately after submission,
 without requiring the Guest to open the envelope again. Unavailable links use
 the existing generic unavailable state instead of an envelope.
 
+The envelope fills the viewport and shows only fixed opening copy, the Host
+Display Names, and a wax seal carrying their initials. Activating it folds the
+flaps away to reveal the page beneath, so the opening and the Invitation read
+as one continuous scene.
+
+The intro may open with a decorative monogram built from the first letters of
+the Host Display Names. It is hidden from assistive technology.
+
 The Guest intro should present:
 
 1. small invitation context;
@@ -278,6 +286,14 @@ Saturday, 21 November 2026
 ```
 
 Exact locale-specific formatting remains deferred until localization conventions are defined.
+
+The date may be set as a decorative lockup (month, weekday, day, year) provided
+the complete written date remains available to assistive technology.
+
+A decorative countdown to the Event start may follow the date and time. It is
+derived only from Event Date, Start Time, and Event Timezone, is hidden from
+assistive technology apart from a plain "days to go" sentence, and is omitted
+once the Event has started. It conveys no RSVP or access state.
 
 ## 7.2 Venue
 
@@ -976,7 +992,7 @@ Use restrained motion only.
 Permitted:
 
 - a brief, user-triggered envelope opening before the first Invitation view;
-- subtle Hero/section entrance;
+- subtle Hero/section entrance, played once as a section scrolls into view;
 - RSVP form conditional-field transition;
 - saved-summary transition;
 - button micro-interaction.
@@ -988,6 +1004,10 @@ Do not animate:
 - page scrolling automatically beyond a user-triggered RSVP anchor.
 
 Under `prefers-reduced-motion: reduce`, remove non-essential movement.
+
+Section entrances never hold back content that is already on screen, and the
+RSVP section is not given an entrance when it carries a just-saved
+confirmation.
 
 ---
 
