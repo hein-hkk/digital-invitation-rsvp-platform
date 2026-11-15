@@ -78,7 +78,8 @@ The Guest Invitation must remain complete and visually coherent when no Hero Ima
 
 Animation may add polish but must never:
 
-- hide critical information;
+- leave critical information concealed after the Guest activates the approved
+  envelope opening control;
 - delay form completion;
 - become necessary to understand state;
 - override reduced-motion preferences.
@@ -160,6 +161,7 @@ Do not scatter raw visual values throughout components when a semantic token exi
 | `--color-info` | `#285A8E` | Informational state |
 | `--color-info-soft` | `#EAF2FA` | Informational background |
 | `--color-overlay` | `rgba(33, 28, 24, 0.52)` | Modal/dialog backdrop |
+| `--color-gilt` | `#B0915F` | Guest decorative hairlines and ornaments only |
 
 These colors form the fixed V1 system. Organizers do not edit them.
 
@@ -171,6 +173,7 @@ Usage rules:
 - Danger color is reserved for error/destructive meaning.
 - Status meaning must not rely on color alone.
 - Focus uses a dedicated visible focus color rather than the decorative accent.
+- `--color-gilt` is decorative only. It is never used for text or to convey state.
 
 ### 4.2 Typography
 
@@ -185,6 +188,11 @@ UI / body / Admin:
 ```
 
 Use `next/font` so fonts are self-hosted by the built application rather than fetched by the browser at runtime.
+
+The Guest wedding theme adds one script accent face, "Pinyon Script", loaded
+the same way and only on Guest routes. It is reserved for Host Display Names
+(envelope, intro, message signature, footer) and falls back to the display
+serif. It is never used for body copy, form controls, Event facts, or Admin UI.
 
 | Role | Mobile | Desktop | Weight | Line height |
 |---|---:|---:|---:|---:|
@@ -710,11 +718,19 @@ Examples include subtle Guest section entry, Dialog transition, status transitio
 
 ### 20.3 Inappropriate motion
 
-Do not use long blocking intros, scroll-jacking, distracting autoplay animation, or animation required to understand business state.
+Do not use long blocking intros, scroll-jacking, distracting autoplay animation, or animation required to understand business state. The approved wedding envelope is a short, user-triggered opening interaction on available public and personalized pages: a full-bleed closed envelope whose flaps fold away in roughly two seconds to reveal the page beneath it. Its control must work by touch, mouse, and keyboard; reduced-motion users reveal content immediately. RSVP confirmation bypasses the envelope.
 
 ### 20.4 Reduced motion
 
 Under `prefers-reduced-motion: reduce`, remove non-essential movement and preserve all functionality.
+
+### 20.5 Guest section entrances
+
+Guest sections may fade and rise into place once as they scroll into view.
+Entrances are a progressive enhancement: the server HTML is fully visible, and
+an entrance is armed only after hydration, only for content not already on
+screen, and never under reduced motion. Guest motion uses CSS only; it must not
+depend on inline styles, which the production Content Security Policy blocks.
 
 ---
 

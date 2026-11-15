@@ -53,6 +53,7 @@ test("E2E-G-02 through 07: Guest RSVP lifecycle and deadline race on a phone", a
     const path = `/i/${rawToken}`;
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(path);
+    await page.locator("summary.wedding-envelope__cover").click();
     await expect(
       page.getByRole("radio", { name: "Attending" }),
     ).not.toBeChecked();
@@ -174,6 +175,7 @@ test("E2E-G-02 through 07: Guest RSVP lifecycle and deadline race on a phone", a
       .eq("id", event.data.id);
     if (reopen.error) throw reopen.error;
     await page.goto(path);
+    await page.locator("summary.wedding-envelope__cover").click();
     await expect(
       page.getByRole("button", { name: "Update RSVP" }),
     ).toBeVisible();

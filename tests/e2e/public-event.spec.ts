@@ -127,9 +127,23 @@ test("Owner enables an unlisted public Event page without exposing Invitation de
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(publicPath);
+    const publicEnvelope = page.locator("summary.wedding-envelope__cover");
+    await expect(publicEnvelope).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "The celebration" }),
+    ).toBeHidden();
+    const closedAccessibility = await new AxeBuilder({ page }).analyze();
+    expect(
+      closedAccessibility.violations.map((violation) => violation.id),
+    ).toEqual([]);
+    await publicEnvelope.focus();
+    await page.keyboard.press("Enter");
     await expect(
       page.getByRole("heading", { name: "The celebration" }),
     ).toBeVisible();
+    // The cover leaves once the opening sequence and intro entrance finish.
+    await expect(publicEnvelope).toBeHidden();
+    await expect(page.locator(".wedding-envelope__content h1")).toBeFocused();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,

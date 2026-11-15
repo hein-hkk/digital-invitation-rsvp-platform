@@ -85,6 +85,7 @@ test("M12 Organizer uploads and removes a private Hero Image; Guest sees the sig
     ).toBeVisible();
 
     await page.goto(`/i/${rawToken}`);
+    await page.locator("summary.wedding-envelope__cover").click();
     await expect(page.getByText("Guest Household")).toBeVisible();
     const image = page.locator('img[alt=""]');
     await expect(image).toBeVisible();
@@ -98,6 +99,7 @@ test("M12 Organizer uploads and removes a private Hero Image; Guest sees the sig
     await page.getByRole("button", { name: "Remove Hero Image" }).click();
     await expect(page.getByRole("status")).toHaveText("Hero Image removed.");
     await page.goto(`/i/${rawToken}`);
+    await page.locator("summary.wedding-envelope__cover").click();
     await expect(page.locator('img[alt=""]')).toHaveCount(0);
   } finally {
     if (eventId) {

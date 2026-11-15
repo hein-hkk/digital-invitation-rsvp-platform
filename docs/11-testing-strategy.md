@@ -621,6 +621,8 @@ Open current Token for active Published Event.
 
 Verify:
 
+- a closed envelope appears first and opens by touch, mouse, and keyboard;
+- reduced-motion preference reveals content without the transition;
 - personalized Invitee context;
 - Host Display Names;
 - Event Date/Time/Venue;
@@ -631,7 +633,7 @@ Verify:
 
 Submit valid Attending RSVP with Attendee Count within Maximum Party Size.
 
-Verify saved summary and persisted state.
+Verify saved summary appears without reopening the envelope and persisted state.
 
 ## E2E-G-03 — Optional/partial names
 
@@ -1229,6 +1231,9 @@ Verify on a real migrated local database and in browser tests:
   Storage; direct anonymous Storage access fails;
 - Event deletion and orphan cleanup handle both private Hero and public cover;
 - noindex/no-follow, cache, mobile, keyboard, and accessibility behavior pass.
+- the available public page starts with an operable envelope, then reveals
+  only the approved public projection; disabled/unavailable pages show no
+  envelope or public details.
 
 ---
 

@@ -115,6 +115,12 @@ test("M14 Guest and Admin states pass accessibility and responsive checks", asyn
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(`/i/${token}`);
+    await expect(page.locator("summary.wedding-envelope__cover")).toBeVisible();
+    await expectAccessible(page, "Guest envelope closed");
+    await page.locator("summary.wedding-envelope__cover").click();
+    await expect(
+      page.getByRole("heading", { name: /Host One and Host Two/ }),
+    ).toBeFocused();
     await expectAccessible(page, "Guest awaiting response");
     expect(
       await page.evaluate(

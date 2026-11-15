@@ -562,6 +562,12 @@ Acceptance criteria:
 
 V1 must provide one curated wedding invitation theme.
 
+On available public Event and personalized Invitation links, the curated theme
+first presents a closed envelope. An accessible activation reveals the existing
+page content with a brief transition or immediately under reduced motion.
+Saved RSVP confirmation appears directly after submission. Unavailable links
+retain their generic unavailable state.
+
 The Organizer may customize supported Event content and optional Hero Image.
 
 V1 must not provide organizer-facing controls for:

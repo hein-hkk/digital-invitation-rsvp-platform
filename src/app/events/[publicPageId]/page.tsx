@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EventAnnouncement } from "@/components/public-event/event-announcement";
+import { WeddingEnvelope } from "@/components/guest/wedding-envelope";
 import { getPublicEventView } from "@/modules/public-event/service";
 import { getAppBaseUrl } from "@/server/env";
 
@@ -40,11 +41,11 @@ export default async function PublicEventPage({
   const event = await getPublicEventView(publicPageId);
   if (!event) notFound();
   return (
-    <main>
+    <WeddingEnvelope hostNames={event.hostDisplayNames}>
       <EventAnnouncement
         event={event}
         coverUrl={event.hasCover ? `/events/${event.publicPageId}/cover` : null}
       />
-    </main>
+    </WeddingEnvelope>
   );
 }

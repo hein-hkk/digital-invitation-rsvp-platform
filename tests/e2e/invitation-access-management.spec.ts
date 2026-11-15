@@ -55,6 +55,7 @@ test("E2E-A-10/11 and E2E-G-09/10 regenerate, then revoke Guest access", async (
       .getByLabel("Current personalized Invitation URL")
       .inputValue();
     await page.goto(new URL(originalUrl).pathname);
+    await page.locator("summary.wedding-envelope__cover").click();
     await expect(page.getByText("Access Household")).toBeVisible();
     await page.goto(
       `/admin/events/${event.data.id}/invitations/${invitationId}`,
@@ -96,6 +97,7 @@ test("E2E-A-10/11 and E2E-G-09/10 regenerate, then revoke Guest access", async (
       page.getByRole("heading", { name: "Invitation unavailable" }),
     ).toBeVisible();
     await page.goto(new URL(newUrl).pathname);
+    await page.locator("summary.wedding-envelope__cover").click();
     await expect(page.getByText("Access Household")).toBeVisible();
     await page.goto(
       `/admin/events/${event.data.id}/invitations/${invitationId}`,

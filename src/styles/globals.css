@@ -22,6 +22,9 @@
   --color-info: #285a8e;
   --color-info-soft: #eaf2fa;
   --color-overlay: rgba(33, 28, 24, 0.52);
+  /* Decorative only: hairlines and ornaments, never text. */
+  --color-gilt: #b0915f;
+  --color-envelope-paper: #efddd3;
 }
 
 @theme inline {

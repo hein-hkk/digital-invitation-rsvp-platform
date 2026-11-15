@@ -137,6 +137,7 @@ test("E2E-A-07/08/12 and E2E-G-08: overview, combined filters, and deadline reop
 
     const guestPath = `/i/${rawToken}`;
     await page.goto(guestPath);
+    await page.locator("summary.wedding-envelope__cover").click();
     await expect(page.getByText("RSVP changes are now closed.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Submit RSVP" })).toHaveCount(
       0,
@@ -152,6 +153,7 @@ test("E2E-A-07/08/12 and E2E-G-08: overview, combined filters, and deadline reop
       page.getByText("Guest RSVP: Open", { exact: true }),
     ).toBeVisible();
     await page.goto(guestPath);
+    await page.locator("summary.wedding-envelope__cover").click();
     await expect(
       page.getByRole("button", { name: "Update RSVP" }),
     ).toBeVisible();
