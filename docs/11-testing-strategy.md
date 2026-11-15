@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines the V1 testing strategy for the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, `09-api-and-server-contracts.md`, and `10-security-and-privacy.md`. Tests must prove approved behavior rather than invent new behavior.
+> **Source-of-truth relationship:** This document defines the V1 testing strategy for the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, `09-api-and-server-contracts.md`, and `10-security-and-privacy.md`. Tests must prove approved behavior rather than invent new behavior.
 
 ---
 
@@ -1208,6 +1208,27 @@ Rules:
 - record and fix root cause.
 
 A quarantined non-critical test must have a tracked owner/reason and must not silently reduce security/acceptance coverage.
+
+---
+
+# 30A. D-29/D-30 Public Event Regression
+
+Verify on a real migrated local database and in browser tests:
+
+- public page defaults disabled for existing/new Events and requires active
+  Published status plus explicit Owner enablement;
+- a shareable URL shows Venue Name and Venue Address but no map URL, arrival
+  notes, Invitation, RSVP, private Hero, or Organizer contact data in HTML,
+  metadata, responses, or logs;
+- public URL alone cannot submit or read an RSVP; the personal Token route
+  retains revocation, regeneration, deadline, and expiration protections;
+- disabled, Draft, Ended, deleted, and unknown public URLs and covers expose
+  no public Event content; disabling takes effect immediately;
+- wrong Owner and anonymous callers cannot manage public settings or cover;
+- public cover upload validates type/size/signature and remains in private
+  Storage; direct anonymous Storage access fails;
+- Event deletion and orphan cleanup handle both private Hero and public cover;
+- noindex/no-follow, cache, mobile, keyboard, and accessibility behavior pass.
 
 ---
 

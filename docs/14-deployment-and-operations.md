@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines the V1 deployment and operational requirements for the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, `09-api-and-server-contracts.md`, `10-security-and-privacy.md`, `11-testing-strategy.md`, `12-development-architecture.md`, and `13-development-roadmap.md`. It must not change approved product behavior.
+> **Source-of-truth relationship:** This document defines the V1 deployment and operational requirements for the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, `09-api-and-server-contracts.md`, `10-security-and-privacy.md`, `11-testing-strategy.md`, `12-development-architecture.md`, and `13-development-roadmap.md`. It must not change approved product behavior.
 
 ---
 
@@ -801,7 +801,7 @@ After deployment:
 [ ] all source-of-truth documents Approved
 [ ] selected runtime/framework/dependency versions were verified from current authoritative sources
 [ ] no unapproved prerelease/experimental dependency is present
-[ ] D-01 through D-28 reflected in implementation
+[ ] D-01 through D-30 reflected in implementation
 [ ] production Supabase configured
 [ ] production Vercel configured
 [ ] HTTPS domain configured
@@ -812,6 +812,8 @@ After deployment:
 [ ] production encryption key/version provisioned
 [ ] service-role secret server-only
 [ ] private Hero Image bucket configured
+[ ] separate public-cover objects remain in that private bucket and are served
+    only after D-29 visibility checks
 [ ] RLS tests pass against production-equivalent schema
 [ ] production rate limits configured
 [ ] security headers configured

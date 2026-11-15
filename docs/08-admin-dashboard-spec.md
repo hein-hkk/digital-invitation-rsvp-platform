@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines the V1 Organizer/Admin experience using the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, and `07-guest-experience-spec.md`. It must not introduce new business behavior.
+> **Source-of-truth relationship:** This document defines the V1 Organizer/Admin experience using the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, and `07-guest-experience-spec.md`. It must not introduce new business behavior.
 
 ---
 
@@ -1596,6 +1596,21 @@ Given the Organizer opens Invitations on a narrow viewport, then required Invita
 | Ended admin read-only | D-26, FR-EVT-006 |
 | Event deletion | D-27, FR-EVT-007 |
 | Organizer OTP sign-in | D-28, FR-SEC-004 |
+
+---
+
+# 41A. D-29 Public Page Settings
+
+Event Settings provides a separate Public Event Page section. The Owner can
+edit an optional public announcement, manage a distinct public cover, preview
+exactly the approved public fields, and enable/disable the page for an active
+Published Event. The section explains that the URL is viewable by anyone who
+receives it, that Venue Name and Venue Address are visible without the map URL
+or arrival notes,
+and that it does not grant RSVP access. A copyable public URL is
+shown only while enabled. Draft and Ended Events cannot enable or edit public
+content; Ended public access is unavailable by time even if the persisted
+enable flag was true. The private Hero Image editor remains separate.
 
 ---
 

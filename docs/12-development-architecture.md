@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines the V1 Codex-facing implementation structure for the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, `09-api-and-server-contracts.md`, `10-security-and-privacy.md`, and `11-testing-strategy.md`. It is lower precedence than those specifications and must not change their business behavior.
+> **Source-of-truth relationship:** This document defines the V1 Codex-facing implementation structure for the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, `09-api-and-server-contracts.md`, `10-security-and-privacy.md`, and `11-testing-strategy.md`. It is lower precedence than those specifications and must not change their business behavior.
 
 ---
 
@@ -1720,6 +1720,20 @@ Time-dependent domain behavior is injectable/deterministic.
 ### DEV-D10 — ESLint + Prettier
 
 Repository-owned automated lint/format configuration.
+
+---
+
+# 51A. D-29 Public Event Module
+
+Keep public Event reads in a server-only domain module with an explicit
+projection type. Do not reuse the personalized Guest projection or grant anon
+select on the Event table. Route code renders the projection and public-safe
+metadata only; the separate cover route rechecks current visibility before
+reading private Storage. Owner public settings use the existing authenticated
+session plus a transactional persistence guard. Public content and private
+Invitation/RSVP caches remain separate. Add migrations rather than rewriting
+applied history, and test the public/private boundary at DB, service, and
+browser layers.
 
 ---
 

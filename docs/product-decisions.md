@@ -57,6 +57,8 @@ The PRD should restate these rules in testable requirement form rather than inve
 | D-26 | Ended Event admin behavior | After Event expiration, the Event is administratively read-only in V1; Organizer may view records and export CSV but may not mutate Event, Invitation, RSVP, deadline, or Invitation-access state. |
 | D-27 | Event retention and deletion | No automatic Event-data purge. Owner may permanently delete Draft or Ended Events; active Published Events cannot be self-service deleted. Deletion removes Event, Invitations, RSVPs, access credentials, and Hero Image; no restore/recycle bin. |
 | D-28 | Organizer provisioning and sign-in | No public Organizer self-sign-up. Organizer accounts are provisioned administratively and sign in with passwordless email OTP through Supabase Auth; unknown emails must not auto-create accounts. |
+| D-29 | Unlisted public Event page | An Organizer may explicitly enable a separate, shareable public page for an active Published Event. It is disabled by default, unlisted/noindex, and unavailable when the Event ends. The page exposes only the approved public projection; a personal Invitation Token remains required for RSVP and private details. |
+| D-30 | Public announcement and cover | An optional public announcement and separately uploaded public cover image may appear on the public page. The existing private Hero Image is never reused as the public cover. |
 
 ---
 
@@ -583,6 +585,43 @@ Exact operational account-provisioning steps and OTP/session configuration belon
 
 ---
 
+### D-29 — Unlisted public Event page
+
+The Event Owner may explicitly enable a separate public Event page only while
+the Event is Published and has not Ended. Public-page access is off for all
+existing and newly created Events until the Owner enables it. The Owner may
+disable the public page without changing Event publication or personalized
+Invitation access. The Owner can preview the page before enabling it.
+
+The public URL is shareable without an account or Invitation Token. It is
+unlisted and marked `noindex, nofollow`; V1 does not add public Event discovery
+or a directory. The URL is not an RSVP credential. The public page becomes
+unavailable automatically at Event expiration and after Event deletion.
+
+The public projection contains only Event Title, Host Display Names, Event
+Date, Start Time, optional End Time, Event Timezone as needed to display local
+time, Venue Name, Venue Address, optional D-30 public announcement, and
+optional D-30 public cover. The page does not expose map URL, arrival notes,
+Event Description / Invitation Message, Dress Code, Organizer Contact
+Information, RSVP Deadline, Invitee data, Invitation Token, Maximum Party
+Size, or any RSVP data. Those details remain in their existing authorized views.
+
+### D-30 — Separate optional public announcement and cover
+
+The Owner may write a short public announcement and upload a public cover image
+for the public Event page. Both are optional; the page must remain complete
+without either. These fields are separate from the private Event Description /
+Invitation Message and private Hero Image. Enabling the public page is the
+Owner's explicit confirmation that the public announcement and cover, if
+present, are suitable to share with anyone who has the public URL.
+
+The existing private Hero Image is never automatically exposed or copied to
+the public page. Public-cover access ends when the public page is disabled,
+the Event Ends, or the Event is deleted. Upload and deletion behavior follows
+the private-storage safety boundary recorded in ADR 008.
+
+---
+
 ## 11. Derived V1 Behavior Matrix
 
 | Situation | Guest | Organizer |
@@ -620,8 +659,8 @@ These must be defined in their appropriate documents rather than inferred from t
 
 ## 13. Next Step
 
-Use D-01 through D-28 as binding inputs to:
+Use D-01 through D-30 as binding inputs to:
 
 **`02-prd.md`**
 
-The PRD should translate D-01 through D-28 into explicit requirements, validation rules, permissions, edge cases, and acceptance criteria.
+The PRD should translate D-01 through D-30 into explicit requirements, validation rules, permissions, edge cases, and acceptance criteria.

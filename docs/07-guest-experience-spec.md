@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines the V1 public Guest Invitation experience using the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, and `06-design-system-and-ui-foundation.md`. It must not introduce new business behavior.
+> **Source-of-truth relationship:** This document defines the V1 public Guest Invitation experience using the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, and `06-design-system-and-ui-foundation.md`. It must not introduce new business behavior.
 
 ---
 
@@ -1044,6 +1044,10 @@ Technical log/redaction requirements are finalized in `10-security-and-privacy.m
 
 Personalized Invitation pages are private-by-link, not public landing pages.
 
+D-29 adds a separate unlisted public Event page. It is never the personalized
+Invitation route and cannot show RSVP controls or private Guest content. It may
+show Venue Name and Venue Address, but not the map URL or arrival notes.
+
 Requirements:
 
 ```text
@@ -1166,7 +1170,8 @@ This document does not define:
 - calendar-file downloads;
 - social sharing controls;
 - Guest account creation;
-- public Event pages;
+- public Event discovery or a searchable directory (the separate D-29
+  unlisted page is approved);
 - message/contact linkification;
 - animation customization;
 - per-Attendee dietary controls;

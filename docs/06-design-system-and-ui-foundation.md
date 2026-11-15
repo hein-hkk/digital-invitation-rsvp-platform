@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines the V1 visual and interaction foundation for the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, and `05-data-model.md`. It must not change approved business behavior.
+> **Source-of-truth relationship:** This document defines the V1 visual and interaction foundation for the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, and `05-data-model.md`. It must not change approved business behavior.
 
 ---
 
@@ -662,6 +662,12 @@ Whether these use Dialogs or dedicated confirmation sections is finalized in `08
 ### Hero Image
 
 Guest design must support Hero Image present, absent, loading, and error fallback.
+
+The D-29 public Save the Date page follows the same accessible, mobile-first
+foundation but has no personalized greeting or RSVP form. Its optional D-30
+public cover is separate from the private Hero Image. The page must remain
+complete and visually coherent without a cover or public announcement. Show
+Venue Name and Venue Address as plain text; do not add map or arrival details.
 
 Recommended behavior:
 

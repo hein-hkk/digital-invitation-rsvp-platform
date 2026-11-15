@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines the V1 technical architecture that implements the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, and `03-user-flows.md`. It must not change approved business behavior.
+> **Source-of-truth relationship:** This document defines the V1 technical architecture that implements the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, and `03-user-flows.md`. It must not change approved business behavior.
 
 ---
 
@@ -1120,9 +1120,18 @@ Exact WCAG targets and component-level accessibility requirements belong to `06-
 - payment provider;
 - ticketing platform;
 - calendar provider;
-- public event discovery service.
+- public event discovery service or directory. D-29 adds only an unlisted
+  public Event page with an explicit Owner opt-in.
 
 The Organizer manually shares the copied personalized Invitation URL through external communication channels.
+
+For D-29, the Organizer may separately share the public Event URL. Its server
+read path returns a strictly limited Event projection, including Venue Name
+and Venue Address but no map URL or arrival notes, only when the Event is active
+Published and its public page is enabled. It never reads Invitation or RSVP
+data for public rendering. The separate private Hero Image remains under
+TA-06; an optional public cover is served through an access-checked route
+from private Storage under ADR 008.
 
 ---
 

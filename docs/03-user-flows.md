@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document translates the approved Product Concept, Product Decisions D-01 through D-28, and `02-prd.md` into end-to-end V1 Organizer and Guest workflows. It does not introduce new business rules.
+> **Source-of-truth relationship:** This document translates the approved Product Concept, Product Decisions D-01 through D-30, and `02-prd.md` into end-to-end V1 Organizer and Guest workflows. It does not introduce new business rules.
 
 ---
 
@@ -951,6 +951,28 @@ Event expires:
 Organizer administrative data remain preserved and accessible subject to authorization.
 
 **Related requirements:** FR-EVT-004, FR-EVT-005, D-09.
+
+---
+
+# 8A. D-29/D-30 Public Event Page Flows
+
+## UF-PUB-01 — Preview and enable
+
+The Owner opens Event Settings, enters an optional public announcement and
+uploads an optional separate public cover, then previews the public projection.
+Only an active Published Event can be enabled. The confirmation states that
+anyone with the public URL can read the displayed content. Enabling provides
+a stable public link for manual sharing; it does not issue an Invitation or
+enable RSVP for an anonymous visitor.
+
+## UF-PUB-02 — Open or disable public page
+
+Anyone with the enabled public URL can view the approved announcement, Venue
+Name, and Venue Address, but not the map URL or arrival notes, while the Event
+remains active Published. The Owner may disable it without changing
+Event publication or Invitation links. The public page and its cover become
+unavailable when disabled, when the Event Ends, or when the Event is deleted.
+Draft and unknown URLs use the same generic unavailable behavior.
 
 ---
 
