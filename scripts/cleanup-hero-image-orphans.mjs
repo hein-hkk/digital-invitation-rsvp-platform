@@ -37,7 +37,7 @@ export async function cleanupHeroImageOrphans({
       if (onlyEventIds && !onlyEventIds.includes(eventId)) continue;
       const reference = await client
         .from("events")
-        .select("hero_image_storage_path")
+        .select("hero_image_storage_path,public_cover_storage_path")
         .eq("id", eventId)
         .maybeSingle();
       if (reference.error)
@@ -52,7 +52,11 @@ export async function cleanupHeroImageOrphans({
           if (!object.id) continue;
           scanned += 1;
           const path = `${eventId}/${object.name}`;
-          if (path === reference.data?.hero_image_storage_path) continue;
+          if (
+            path === reference.data?.hero_image_storage_path ||
+            path === reference.data?.public_cover_storage_path
+          )
+            continue;
           const modifiedAt = Date.parse(
             object.updated_at ?? object.created_at ?? "",
           );
@@ -77,11 +81,15 @@ export async function cleanupHeroImageOrphans({
     for (const candidate of candidates) {
       const current = await client
         .from("events")
-        .select("hero_image_storage_path")
+        .select("hero_image_storage_path,public_cover_storage_path")
         .eq("id", candidate.eventId)
         .maybeSingle();
       if (current.error) throw new Error("Hero Image reference lookup failed");
-      if (current.data?.hero_image_storage_path === candidate.path) continue;
+      if (
+        current.data?.hero_image_storage_path === candidate.path ||
+        current.data?.public_cover_storage_path === candidate.path
+      )
+        continue;
       try {
         const result = await bucket.remove([candidate.path]);
         if (result.error) failed += 1;

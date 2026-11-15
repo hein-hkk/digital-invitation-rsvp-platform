@@ -1,11 +1,12 @@
 # Hero Image orphan cleanup
 
-The `hero-images` bucket must remain private. A failed Storage deletion after
+The `hero-images` bucket must remain private. It holds both the private Hero
+Image and the separate D-30 public cover. A failed Storage deletion after
 Event database deletion leaves an unreferenced private object. Signed uploads
 that are never finalized can also leave one.
 
 Run the cleanup at least daily. It scans Event folders, keeps referenced
-objects, and considers unreferenced objects only after a 24-hour grace period.
+objects of either kind, and considers unreferenced objects only after a 24-hour grace period.
 It checks the Event reference again immediately before each removal. The
 database deletion remains committed if a Storage removal fails.
 

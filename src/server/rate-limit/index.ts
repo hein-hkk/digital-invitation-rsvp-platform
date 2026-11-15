@@ -27,7 +27,11 @@ export type HighImpactOperation =
   | "heroFinalize"
   | "heroRemoval"
   | "eventPublication"
-  | "eventDeletion";
+  | "eventDeletion"
+  | "publicEventSettings"
+  | "publicCoverUpload"
+  | "publicCoverFinalize"
+  | "publicCoverRemoval";
 
 /** Vercel supplies the trusted network signal in production. */
 function networkSignal(requestHeaders: Headers): string {

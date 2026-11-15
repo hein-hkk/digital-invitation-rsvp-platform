@@ -5,6 +5,7 @@ import {
   HERO_IMAGE_BUCKET,
   isEventHeroImagePath,
 } from "@/modules/hero-image/validation";
+import { isPublicCoverPath } from "@/modules/public-event/validation";
 import { resolveOrganizerSession } from "@/server/auth/session";
 import { logger } from "@/server/observability/logger";
 import { createAuthenticatedSupabaseClient } from "@/server/supabase/authenticated";
@@ -242,7 +243,7 @@ export function createEventOperations(context: EventContext) {
       if (!privilegedClient) {
         throw new EventServiceError("EVENT_PERSISTENCE_ERROR");
       }
-      const { data: heroPath, error } = await privilegedClient.rpc(
+      const { data: imageReferences, error } = await privilegedClient.rpc(
         "delete_event_record",
         { p_event_id: eventId, p_owner_user_id: organizerId },
       );
@@ -255,26 +256,46 @@ export function createEventOperations(context: EventContext) {
               : "EVENT_PERSISTENCE_ERROR",
         );
       }
-      if (heroPath) {
-        if (!isEventHeroImagePath(eventId, heroPath)) {
+      const references =
+        imageReferences &&
+        typeof imageReferences === "object" &&
+        !Array.isArray(imageReferences)
+          ? imageReferences
+          : {};
+      for (const image of [
+        {
+          path: references.heroPath,
+          valid: isEventHeroImagePath,
+          operation: "eventDeleteHeroCleanup",
+          invalidCode: "invalidHeroImagePath",
+        },
+        {
+          path: references.publicCoverPath,
+          valid: isPublicCoverPath,
+          operation: "eventDeletePublicCoverCleanup",
+          invalidCode: "invalidPublicCoverPath",
+        },
+      ]) {
+        if (typeof image.path !== "string") continue;
+        if (!image.valid(eventId, image.path)) {
           logger.log("warn", {
-            operation: "eventDeleteHeroCleanup",
+            operation: image.operation,
             eventId,
-            errorCode: "invalidHeroImagePath",
+            errorCode: image.invalidCode,
           });
         } else {
           try {
             if (context.removeHeroImageObject) {
-              await context.removeHeroImageObject(heroPath);
+              await context.removeHeroImageObject(image.path);
             } else {
               const removed = await privilegedClient.storage
                 .from(HERO_IMAGE_BUCKET)
-                .remove([heroPath]);
+                .remove([image.path]);
               if (removed.error) throw removed.error;
             }
           } catch {
             logger.log("warn", {
-              operation: "eventDeleteHeroCleanup",
+              operation: image.operation,
               eventId,
               errorCode: "storageRemoveFailed",
             });

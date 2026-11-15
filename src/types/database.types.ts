@@ -49,6 +49,10 @@ export type Database = {
           invitation_message: string | null;
           organizer_contact_information: string | null;
           owner_user_id: string;
+          public_announcement: string | null;
+          public_cover_storage_path: string | null;
+          public_page_enabled: boolean;
+          public_page_id: string;
           publication_status: Database["public"]["Enums"]["event_publication_status"];
           published_at: string | null;
           rsvp_deadline_local: string | null;
@@ -74,6 +78,10 @@ export type Database = {
           invitation_message?: string | null;
           organizer_contact_information?: string | null;
           owner_user_id: string;
+          public_announcement?: string | null;
+          public_cover_storage_path?: string | null;
+          public_page_enabled?: boolean;
+          public_page_id?: string;
           publication_status?: Database["public"]["Enums"]["event_publication_status"];
           published_at?: string | null;
           rsvp_deadline_local?: string | null;
@@ -98,6 +106,10 @@ export type Database = {
           invitation_message?: string | null;
           organizer_contact_information?: string | null;
           owner_user_id?: string;
+          public_announcement?: string | null;
+          public_cover_storage_path?: string | null;
+          public_page_enabled?: boolean;
+          public_page_id?: string;
           publication_status?: Database["public"]["Enums"]["event_publication_status"];
           published_at?: string | null;
           rsvp_deadline_local?: string | null;
@@ -232,6 +244,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      consume_rate_limit: {
+        Args: {
+          p_bucket_hash: string;
+          p_max_attempts: number;
+          p_window_seconds: number;
+        };
+        Returns: boolean;
+      };
       create_invitation_record: {
         Args: {
           p_event_id: string;
@@ -246,15 +266,7 @@ export type Database = {
       };
       delete_event_record: {
         Args: { p_event_id: string; p_owner_user_id: string };
-        Returns: string | null;
-      };
-      consume_rate_limit: {
-        Args: {
-          p_bucket_hash: string;
-          p_max_attempts: number;
-          p_window_seconds: number;
-        };
-        Returns: boolean;
+        Returns: Json;
       };
       publish_event: { Args: { p_event_id: string }; Returns: undefined };
       purge_expired_rate_limit_attempts: {
@@ -283,6 +295,24 @@ export type Database = {
           p_storage_path: string | null;
         };
         Returns: string | null;
+      };
+      set_public_cover_reference: {
+        Args: {
+          p_event_id: string;
+          p_expected_previous_path: string | null;
+          p_owner_user_id: string;
+          p_storage_path: string | null;
+        };
+        Returns: string | null;
+      };
+      set_public_event_page: {
+        Args: {
+          p_announcement: string;
+          p_enabled: boolean;
+          p_event_id: string;
+          p_owner_user_id: string;
+        };
+        Returns: undefined;
       };
       submit_guest_rsvp: {
         Args: {

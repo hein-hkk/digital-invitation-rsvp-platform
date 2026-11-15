@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { EventForm } from "@/components/admin/event-form";
 import { EventDeleteAction } from "@/components/admin/event-delete-action";
 import { HeroImageEditor } from "@/components/admin/hero-image-editor";
+import { PublicEventPageEditor } from "@/components/admin/public-event-page-editor";
 import { getAdminHeroImageSignedUrl } from "@/modules/hero-image/service";
+import { getAdminPublicCoverSignedUrl } from "@/modules/public-event/service";
 import { getPublicSupabaseEnv } from "@/server/env";
 import {
   deleteEventAction,
@@ -38,6 +40,7 @@ export default async function EventSettingsPage({
   const publicationErrors =
     publishResult === "blocked" ? validateEventValues(values, true) : {};
   const previewUrl = await getAdminHeroImageSignedUrl(eventId);
+  const publicCoverPreviewUrl = await getAdminPublicCoverSignedUrl(eventId);
   const publicSupabase = getPublicSupabaseEnv();
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
@@ -124,6 +127,16 @@ export default async function EventSettingsPage({
         eventId={eventId}
         previewUrl={previewUrl}
         mutable={runtimeState !== "ended"}
+        supabaseUrl={publicSupabase.NEXT_PUBLIC_SUPABASE_URL}
+        supabaseAnonKey={publicSupabase.NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      />
+      <PublicEventPageEditor
+        eventId={eventId}
+        publicPageId={event.public_page_id}
+        initiallyEnabled={event.public_page_enabled}
+        initialAnnouncement={event.public_announcement}
+        coverPreviewUrl={publicCoverPreviewUrl}
+        runtimeState={runtimeState}
         supabaseUrl={publicSupabase.NEXT_PUBLIC_SUPABASE_URL}
         supabaseAnonKey={publicSupabase.NEXT_PUBLIC_SUPABASE_ANON_KEY}
       />

@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines the V1 security and privacy requirements for the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, and `09-api-and-server-contracts.md`. It must not introduce new product/business behavior.
+> **Source-of-truth relationship:** This document defines the V1 security and privacy requirements for the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, and `09-api-and-server-contracts.md`. It must not introduce new product/business behavior.
 
 ---
 
@@ -1060,9 +1060,19 @@ Requirements:
 
 ## 24.3 Event/location data
 
-Venue, date, time, and private Event details are not public discovery data.
+Map URL, arrival notes, and other private Event details remain accessible only
+to the authorized Organizer or through a valid Guest Invitation before
+expiration. Under D-29, the Owner may separately opt into an unlisted public
+page that discloses only Event Title, Host Display Names, Event Date,
+Start/optional End Time, Venue Name, Venue Address, optional public
+announcement, and optional separate public cover. Publication alone does not
+disclose them. The public page ends at Event expiration and can be disabled
+earlier. No map URL, arrival notes, contact, Invitation content, private Hero
+Image, or RSVP data are public.
 
-They are visible only through authorized Organizer access or a valid Guest Invitation before expiration.
+The public URL is not a credential; `noindex` is not authorization. Public
+reads and cover delivery recheck current visibility without shared caching.
+Anonymous database roles retain no broad Event/Invitation/RSVP table access.
 
 ---
 

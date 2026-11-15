@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document turns the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, and `04-technical-architecture.md` into the concrete V1 PostgreSQL data model. It must not introduce new product behavior.
+> **Source-of-truth relationship:** This document turns the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, and `04-technical-architecture.md` into the concrete V1 PostgreSQL data model. It must not introduce new product behavior.
 
 ---
 
@@ -185,13 +185,17 @@ Draft Events may be incomplete. Published Events must satisfy publication comple
 | `end_time` | `time without time zone` | Yes | Optional local End Time on Event Date |
 | `event_timezone` | `text` | Yes in Draft | IANA timezone identifier |
 | `rsvp_deadline_local` | `timestamp without time zone` | Yes | Optional deadline interpreted in Event Timezone |
-| `venue_name` | `text` | Yes in Draft | Venue display name |
-| `venue_address` | `text` | Yes in Draft | Venue address |
+| `venue_name` | `text` | Yes in Draft | Venue display name; included in the opted-in D-29 public projection |
+| `venue_address` | `text` | Yes in Draft | Venue address; included in the opted-in D-29 public projection |
 | `venue_map_url` | `text` | Yes | Optional external map URL |
 | `dress_code` | `text` | Yes | Optional free-text dress code |
 | `invitation_message` | `text` | Yes | Optional Event Description / Invitation Message |
 | `venue_arrival_notes` | `text` | Yes | Optional venue / arrival notes |
 | `hero_image_storage_path` | `text` | Yes | Optional Supabase Storage object path |
+| `public_page_id` | `uuid` | No | Stable random identifier for the D-29 shareable URL; unique, not an RSVP credential |
+| `public_page_enabled` | `boolean` | No | Owner opt-in; default false for new and existing Events |
+| `public_announcement` | `text` | Yes | Optional public text, separate from `invitation_message` |
+| `public_cover_storage_path` | `text` | Yes | Separate optional cover in private Storage; not the Hero Image path |
 | `organizer_contact_information` | `text` | Yes | Optional display contact information |
 | `published_at` | `timestamptz` | Yes | Set when Event becomes Published |
 | `created_at` | `timestamptz` | No | Record creation time |

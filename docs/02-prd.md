@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This PRD converts `README.md`, `01-product-concept.md`, and approved decisions D-01 through D-28 in `product-decisions.md` into testable V1 product requirements.
+> **Source-of-truth relationship:** This PRD converts `README.md`, `01-product-concept.md`, and approved decisions D-01 through D-30 in `product-decisions.md` into testable V1 product requirements.
 
 ---
 
@@ -581,6 +581,37 @@ Acceptance criteria:
 
 - Given a Guest opens the Invitation on a phone-sized viewport, they can understand the Event details and complete a valid RSVP.
 
+### FR-PUB-001 — Separate unlisted public Event page
+
+An Event Owner may preview, enable, and disable a separate shareable public
+page for an active Published Event. New and existing Events default to public
+page disabled. Draft, disabled, Ended, and deleted Events expose no public
+Event projection. The page is unlisted/noindex, and disabling it does not
+change Event publication or personalized Invitation access.
+
+The page contains only Event Title, Host Display Names, Event Date, Start
+Time, optional End Time, Venue Name, Venue Address, and the optional public
+announcement and public cover. Event Timezone may be used to display the local
+time. It contains no map URL, arrival notes, private Invitation content,
+Organizer contact, RSVP Deadline, Invitee, Invitation Token, Maximum Party
+Size, or RSVP data.
+
+Acceptance criteria:
+
+- Given an enabled active Published Event, anyone with the public URL can view
+  only those approved fields without an account or Invitation Token.
+- Given the Owner disables the page or the Event Ends, the public page and
+  cover are unavailable immediately.
+- A public URL alone cannot read or mutate an Invitation or RSVP.
+
+### FR-PUB-002 — Optional public announcement and cover
+
+The Owner may set a short public announcement and separately upload/replace/
+remove a public cover while the Event is mutable. Neither is required to
+enable the page. The private Hero Image and Event Description / Invitation
+Message are never copied or displayed automatically. The Owner previews the
+public page before enabling it.
+
 ---
 
 ## 10. Security and Access Requirements
@@ -649,7 +680,8 @@ V1 does not include:
 - ticket sales;
 - SMS, WhatsApp, LINE, or email automation;
 - seating chart;
-- public event discovery;
+- public event discovery or a searchable Event directory (the D-29 unlisted,
+  shareable public Event page is approved separately);
 - native mobile apps;
 - attendee categories;
 - Event duplication;

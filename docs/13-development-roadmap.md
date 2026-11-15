@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines the V1 implementation sequence for the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, `09-api-and-server-contracts.md`, `10-security-and-privacy.md`, `11-testing-strategy.md`, and `12-development-architecture.md`. It is an implementation-order document and must not change approved product behavior.
+> **Source-of-truth relationship:** This document defines the V1 implementation sequence for the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, `08-admin-dashboard-spec.md`, `09-api-and-server-contracts.md`, `10-security-and-privacy.md`, `11-testing-strategy.md`, and `12-development-architecture.md`. It is an implementation-order document and must not change approved product behavior.
 
 ---
 
@@ -133,6 +133,8 @@ M12 Hero Image
 M13 Event Deletion
  ↓
 M14 Security, Accessibility & Regression Hardening
+ ↓
+M14A Unlisted Public Event Page (D-29/D-30)
  ↓
 M15 Production Readiness / Launch Gate
 ```
@@ -1034,6 +1036,19 @@ Run all required:
 ## 18.6 Completion criteria
 
 All required testing-strategy mappings pass with no unresolved critical security regression.
+
+---
+
+# 18A. M14A — Unlisted Public Event Page
+
+M14A is the approved D-29/D-30 pre-launch addition after M14. It is not
+production readiness and does not introduce public Event discovery.
+
+Implement Owner preview/opt-in, a separate stable public URL, approved public
+projection, optional announcement and separate public cover, access-checked
+cover delivery, and deletion/orphan cleanup. Preserve the personal Invitation
+Token and RSVP boundary. Finish only when the Section 30A testing-strategy
+regressions and affected M14 security/accessibility/responsive gates pass.
 
 ---
 

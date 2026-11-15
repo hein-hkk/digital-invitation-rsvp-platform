@@ -4,7 +4,7 @@
 > **Document status:** Approved  
 > **Project phase:** Planning / Specification  
 > **Initial vertical:** Wedding RSVP Website  
-> **Source-of-truth relationship:** This document defines V1 server contracts for the approved Product Concept, Product Decisions D-01 through D-28, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, and `08-admin-dashboard-spec.md`. It must not introduce new business behavior.
+> **Source-of-truth relationship:** This document defines V1 server contracts for the approved Product Concept, Product Decisions D-01 through D-30, `02-prd.md`, `03-user-flows.md`, `04-technical-architecture.md`, `05-data-model.md`, `06-design-system-and-ui-foundation.md`, `07-guest-experience-spec.md`, and `08-admin-dashboard-spec.md`. It must not introduce new business behavior.
 
 ---
 
@@ -1314,6 +1314,30 @@ Given an Organizer owns an active Published Event, when `deleteEvent` is attempt
 
 Given a Guest-controlled exported text value whose first non-whitespace character is `=`, `+`, `-`, or `@`, when CSV export is generated, then the exported cell is neutralized before CSV escaping so spreadsheet software does not execute it as a formula.
 
+
+# 28A. D-29 Public Event Contracts
+
+`getPublicEvent(publicPageId)` is a server-only read returning only the D-29
+public projection. It requires `published`, `public_page_enabled`, and
+not-Ended at request time; all other cases return a generic unavailable
+result. The projection includes Venue Name and Venue Address, but excludes map
+URL and arrival notes. `getPublicCover(publicPageId)` repeats that check and
+streams only the separate validated cover object with no-store semantics.
+Neither accepts nor returns an Invitation Token, Invitation ID, RSVP, private
+Hero path, or
+Organizer identity.
+
+Owner-only `savePublicAnnouncement`, `setPublicPageEnabled`, and public-cover
+prepare/finalize/remove operations require the current authenticated Owner,
+check Event mutability, validate inputs, and fail safely on stale state.
+Enabling requires an active Published Event. Disabling does not mutate Event
+publication or Invitation access. The Owner preview uses the same public
+projection with authenticated Owner access while the page is disabled.
+
+The public URL has no write contract. `submitGuestRsvp` continues to require
+the current valid Invitation Token and all existing server/database checks.
+
+---
 
 # 29. Traceability
 
