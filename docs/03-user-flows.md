@@ -719,9 +719,10 @@ The system evaluates whether:
 1. Guest opens the link.
 2. System validates access.
 3. System identifies only the Invitation associated with that token.
-4. System displays the personalized wedding Invitation and Event information.
-5. System displays current RSVP state.
-6. Guest is not required to create an account.
+4. System presents a closed wedding envelope. The Guest activates it to reveal
+   the personalized Invitation, Event information, and current RSVP state.
+5. Guest is not required to create an account. After saving an RSVP, the saved
+   confirmation appears directly without repeating the envelope reveal.
 
 ### Unavailable branches
 
@@ -973,6 +974,9 @@ remains active Published. The Owner may disable it without changing
 Event publication or Invitation links. The public page and its cover become
 unavailable when disabled, when the Event Ends, or when the Event is deleted.
 Draft and unknown URLs use the same generic unavailable behavior.
+On an available public URL, a closed wedding envelope opens on activation to
+reveal the approved public projection. The envelope does not grant Invitation
+or RSVP access.
 
 ---
 

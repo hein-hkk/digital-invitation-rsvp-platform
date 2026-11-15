@@ -124,6 +124,14 @@ On desktop, sections may use more generous spacing and wider Hero media, but the
 
 ## 5.1 Content order
 
+On the first available Invitation view, present a closed, keyboard-operable
+wedding envelope before the personalized intro. Activating it reveals the
+existing page content in the order below. Keep the opening transition brief,
+respect reduced-motion preferences, and move keyboard focus to the revealed
+intro. A saved RSVP confirmation must appear immediately after submission,
+without requiring the Guest to open the envelope again. Unavailable links use
+the existing generic unavailable state instead of an envelope.
+
 The Guest intro should present:
 
 1. small invitation context;
@@ -967,6 +975,7 @@ Use restrained motion only.
 
 Permitted:
 
+- a brief, user-triggered envelope opening before the first Invitation view;
 - subtle Hero/section entrance;
 - RSVP form conditional-field transition;
 - saved-summary transition;

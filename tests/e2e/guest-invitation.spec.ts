@@ -67,9 +67,18 @@ test("E2E-G-01/11 and M6 privacy headers render one personalized Invitation on a
     expect(html).not.toContain("Private Synthetic Event");
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(path);
-    await expect(
-      page.getByRole("heading", { name: /Alex and Sam/ }),
-    ).toBeVisible();
+    const envelope = page.locator("summary.wedding-envelope__cover");
+    await expect(envelope).toBeVisible();
+    await expect(page.getByText("Private Venue")).toBeHidden();
+    await page.screenshot({
+      path: "test-results/wedding-envelope-mobile.png",
+      fullPage: true,
+    });
+    await envelope.focus();
+    await page.keyboard.press("Enter");
+    const invitationHeading = page.locator(".wedding-envelope__content h1");
+    await expect(invitationHeading).toBeVisible();
+    await expect(invitationHeading).toBeFocused();
     await expect(page.getByText("Guest Household")).toBeVisible();
     await expect(page.getByText("Private Venue")).toBeVisible();
     await expect(page.getByText("123 Synthetic Lane")).toBeVisible();
@@ -106,6 +115,7 @@ test("E2E-G-01/11 and M6 privacy headers render one personalized Invitation on a
       .eq("id", event.data.id);
     if (contentUpdate.error) throw contentUpdate.error;
     await page.goto(path);
+    await page.locator("summary.wedding-envelope__cover").click();
     await expect(page.getByText(injected)).toBeVisible();
     expect(
       await page.evaluate(

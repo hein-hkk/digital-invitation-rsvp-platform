@@ -37,7 +37,10 @@ export function EventAnnouncement({
         <p className="text-xs font-semibold tracking-[0.2em] text-accent uppercase">
           Save the date
         </p>
-        <h1 className="mt-5 font-display text-4xl leading-tight text-text sm:text-6xl">
+        <h1
+          tabIndex={-1}
+          className="mt-5 font-display text-4xl leading-tight text-text sm:text-6xl"
+        >
           {hosts}
         </h1>
         <p className="mt-5 text-lg text-text-muted">{event.eventTitle}</p>

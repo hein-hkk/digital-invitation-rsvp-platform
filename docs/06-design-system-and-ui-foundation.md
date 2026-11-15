@@ -78,7 +78,8 @@ The Guest Invitation must remain complete and visually coherent when no Hero Ima
 
 Animation may add polish but must never:
 
-- hide critical information;
+- leave critical information concealed after the Guest activates the approved
+  envelope opening control;
 - delay form completion;
 - become necessary to understand state;
 - override reduced-motion preferences.
@@ -710,7 +711,7 @@ Examples include subtle Guest section entry, Dialog transition, status transitio
 
 ### 20.3 Inappropriate motion
 
-Do not use long blocking intros, scroll-jacking, distracting autoplay animation, or animation required to understand business state.
+Do not use long blocking intros, scroll-jacking, distracting autoplay animation, or animation required to understand business state. The approved wedding envelope is a short, user-triggered opening interaction on available public and personalized pages. Its control must work by touch, mouse, and keyboard; reduced-motion users reveal content immediately. RSVP confirmation bypasses the envelope.
 
 ### 20.4 Reduced motion
 

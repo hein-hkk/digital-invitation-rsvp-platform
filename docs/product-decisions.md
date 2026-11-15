@@ -317,6 +317,9 @@ The PRD must define validation relationships between Event Date/Time, RSVP Deadl
 ### D-15 — One curated wedding theme in V1
 
 V1 provides one curated wedding invitation theme.
+Its available public and personalized pages use a closed envelope that opens
+on activation to reveal the existing wedding content. This is a fixed part of
+the curated theme, not an Organizer-configurable animation setting.
 
 The Organizer may customize supported Event content, including the optional Hero Image.
 

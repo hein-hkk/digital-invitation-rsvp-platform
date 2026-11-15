@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GuestRsvpSection } from "@/components/guest/guest-rsvp-section";
 import { HeroImage } from "@/components/guest/hero-image";
+import { WeddingEnvelope } from "@/components/guest/wedding-envelope";
 import {
   resolveGuestInvitation,
   type GuestInvitationView,
@@ -56,12 +57,15 @@ function GuestInvitation({
   }).format(event.hostDisplayNames);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-12 sm:px-8 sm:pt-20">
+    <div className="mx-auto w-full max-w-3xl px-4 pb-16 pt-12 sm:px-8 sm:pt-20">
       <header className="text-center">
         <p className="text-xs font-semibold tracking-[0.2em] text-accent uppercase">
           You’re invited
         </p>
-        <h1 className="mt-5 font-display text-4xl leading-tight text-text sm:text-6xl">
+        <h1
+          tabIndex={-1}
+          className="mt-5 font-display text-4xl leading-tight text-text sm:text-6xl"
+        >
           {hosts}
         </h1>
         <p className="mt-9 text-sm text-text-muted">For</p>
@@ -172,7 +176,7 @@ function GuestInvitation({
           </p>
         </section>
       )}
-    </main>
+    </div>
   );
 }
 
@@ -198,10 +202,15 @@ export default async function GuestPage({
     );
   }
   return (
-    <GuestInvitation
-      invitation={result.value}
-      token={token}
-      saved={saved === "1"}
-    />
+    <WeddingEnvelope
+      hostNames={result.value.event.hostDisplayNames}
+      initiallyOpen={saved === "1"}
+    >
+      <GuestInvitation
+        invitation={result.value}
+        token={token}
+        saved={saved === "1"}
+      />
+    </WeddingEnvelope>
   );
 }

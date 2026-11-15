@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { connection } from "next/server";
 import "@/styles/globals.css";
+import "@/styles/wedding-envelope.css";
 
 const inter = Inter({
   subsets: ["latin"],

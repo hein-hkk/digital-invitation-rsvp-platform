@@ -22,6 +22,10 @@
   --color-info: #285a8e;
   --color-info-soft: #eaf2fa;
   --color-overlay: rgba(33, 28, 24, 0.52);
+  --color-envelope-paper: #ead0cb;
+  --color-envelope-fold: #e1bdb9;
+  --color-envelope-liner: #f8e9e3;
+  --color-envelope-wax: #95676a;
 }
 
 @theme inline {
