@@ -71,7 +71,7 @@ export function OrganizerSignIn() {
           <form action={verifyAction} className="mt-5 flex flex-col gap-3">
             <input type="hidden" name="email" value={request.email} />
             <label htmlFor="token" className="font-medium">
-              Six-digit code
+              Sign-in code
             </label>
             <input
               id="token"
@@ -79,9 +79,9 @@ export function OrganizerSignIn() {
               type="text"
               required
               inputMode="numeric"
-              pattern="[0-9]{6}"
+              pattern="[0-9]{6,10}"
               autoComplete="one-time-code"
-              maxLength={6}
+              maxLength={10}
               className="rounded border border-border-strong bg-surface px-3 py-2"
             />
             <button

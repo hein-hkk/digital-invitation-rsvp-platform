@@ -19,7 +19,7 @@ test("AUTH-05/06 and E2E-A-01 provisioned Organizer signs in, reaches Events, an
     await page.getByRole("button", { name: "Send code" }).click();
     await expect(page.getByRole("status")).toBeVisible();
     const code = await readLatestOtp(organizer.email);
-    await page.getByLabel("Six-digit code").fill(code);
+    await page.getByLabel("Sign-in code").fill(code);
     await page.getByRole("button", { name: "Verify code" }).click();
     await expect(page).toHaveURL(/\/admin$/);
     await expect(
