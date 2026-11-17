@@ -158,7 +158,7 @@ test("M14 Guest and Admin states pass accessibility and responsive checks", asyn
     await page.getByRole("button", { name: "Send code" }).click();
     await expect(page.getByRole("status")).toBeVisible();
     await page
-      .getByLabel("Six-digit code")
+      .getByLabel("Sign-in code")
       .fill(await readLatestOtp(organizer.email));
     await page.getByRole("button", { name: "Verify code" }).click();
     await expect(page).toHaveURL(/\/admin$/);

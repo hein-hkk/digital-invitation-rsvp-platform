@@ -37,7 +37,7 @@ test("E2E-A-06/09 manages current RSVP and enforces party-size conflict", async 
     await page.getByLabel("Email address").fill(organizer.email);
     await page.getByRole("button", { name: "Send code" }).click();
     await page
-      .getByLabel("Six-digit code")
+      .getByLabel("Sign-in code")
       .fill(await readLatestOtp(organizer.email));
     await page.getByRole("button", { name: "Verify code" }).click();
     await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });

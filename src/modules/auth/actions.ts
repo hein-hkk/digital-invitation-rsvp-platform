@@ -6,7 +6,7 @@ import { createActionAuthClient } from "@/server/auth/session";
 import { allowOrganizerOtp } from "@/server/rate-limit";
 
 const emailSchema = z.email().max(254);
-const otpSchema = z.string().regex(/^\d{6}$/);
+const otpSchema = z.string().regex(/^\d{6,10}$/);
 
 export type RequestOtpState = {
   status: "idle" | "sent" | "error" | "throttled" | "unavailable";

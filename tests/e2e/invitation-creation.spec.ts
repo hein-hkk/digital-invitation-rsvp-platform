@@ -27,7 +27,7 @@ test("E2E-A-05/06 creates a Draft Invitation and copies its current link", async
     await page.getByRole("button", { name: "Send code" }).click();
     await expect(page.getByRole("status")).toBeVisible({ timeout: 15_000 });
     await page
-      .getByLabel("Six-digit code")
+      .getByLabel("Sign-in code")
       .fill(await readLatestOtp(organizer.email));
     await page.getByRole("button", { name: "Verify code" }).click();
     await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });

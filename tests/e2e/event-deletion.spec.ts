@@ -110,7 +110,7 @@ test("M13 confirms Draft and Ended deletion, hides active deletion, and invalida
     await page.getByRole("button", { name: "Send code" }).click();
     await expect(page.getByRole("status")).toBeVisible({ timeout: 15_000 });
     await page
-      .getByLabel("Six-digit code")
+      .getByLabel("Sign-in code")
       .fill(await readLatestOtp(organizer.email));
     await page.getByRole("button", { name: "Verify code" }).click();
     await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });
